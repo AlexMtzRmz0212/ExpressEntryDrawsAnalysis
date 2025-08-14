@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import os
+import json
 
 def clear_terminal():
     """Clear terminal output for better visibility."""
@@ -80,10 +81,13 @@ def main():
     
     # API endpoint for Express Entry draw data
     api_url = "https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json"
-    csv_filename = "ExpressEntry.csv"
+    csv_filename = "./Data/ExpressEntry.csv"
     
     # Fetch data from API
     data = fetch_express_entry_data(api_url)
+    # Save json data in a proper format
+    with open("./Data/ExpressEntry.json", "w") as json_file:
+        json.dump(data, json_file, indent=4)
     api_draw_count = len(data["rounds"])
     
     # Check existing records

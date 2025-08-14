@@ -14,3 +14,15 @@
 1. Clone this repo.  
 2. Install dependencies: `pip install -r requirements.txt`.  
 3. Open `notebooks/analysis.ipynb`.  
+
+dd1: Number of Federal Skilled Worker Program invitations
+
+dd2: Number of Canadian Experience Class invitations
+
+dd3: Number of Federal Skilled Trades Program invitations
+
+dd4 to dd9: Sub-categories by provinces or regions for invitations (e.g., Ontario, Quebec, BC, Alberta, etc.)
+
+dd10 to dd15: Distribution by language proficiency or age groups
+
+dd16 to dd18: Other stats like total candidates in pool, total applicants invited historically, or pending applications
