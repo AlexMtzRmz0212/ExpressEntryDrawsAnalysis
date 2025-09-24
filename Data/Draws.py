@@ -23,8 +23,34 @@ class ExpressEntryManager:
         
         # Define columns to keep (reduced for efficiency)
         self.selected_columns = [
-            "drawNumber", "drawDate", "drawDateFull", "drawName", "drawSize", 
-            "drawCRS", "drawText2", "drawDateTime"
+            "drawNumber", 
+            "drawDate", 
+            # "drawDateFull",
+            "drawDateTime", 
+            "drawName", 
+            "drawSize", 
+            "drawCRS", 
+            "drawText2", 
+            "drawCutOff",
+            "drawDistributionAsOn",
+            "dd1",
+            "dd2",
+            "dd3",
+            "dd4",
+            "dd5",
+            "dd6",
+            "dd7",
+            "dd8",
+            "dd9",
+            "dd10",
+            "dd11",
+            "dd12",
+            "dd13",
+            "dd14",
+            "dd15",
+            "dd16",
+            "dd17",
+            "dd18"
         ]
     
     def clear_terminal(self):
@@ -79,7 +105,9 @@ class ExpressEntryManager:
             
             # Only update if there are changes
             if existing_count == new_count and existing_df is not None:
-                logger.info("Data is already up to date")
+                logger.info("Number of draws unchanged")
+                new_df.to_csv(self.csv_path, index=False)
+                logger.info(f"Updated data: {existing_count} → {new_count} draws")
                 return False, existing_count, new_count
             
             # Save new data
@@ -121,13 +149,35 @@ class ExpressEntryManager:
             return
         
         # Extract data with safe defaults
+        draw_number = draw_data.get("drawNumber", "Unknown")
         draw_date = draw_data.get("drawDate", "Unknown")
         draw_date_full = draw_data.get("drawDateFull", draw_date)
-        draw_number = draw_data.get("drawNumber", "Unknown")
+        draw_datetime = draw_data.get("drawDateTime", "")
         draw_name = draw_data.get("drawName", "Unknown")
         draw_size = draw_data.get("drawSize", "Unknown")
         min_crs = draw_data.get("drawCRS", "Unknown")
-        
+        draw_text2 = draw_data.get("drawText2", "")
+        draw_cutoff = draw_data.get("drawCutOff", "")
+        draw_distribution_as_on = draw_data.get("drawDistributionAsOn", "")
+        draw_dd1 = draw_data.get("dd1", "")
+        draw_dd2 = draw_data.get("dd2", "")
+        draw_dd3 = draw_data.get("dd3", "")
+        draw_dd4 = draw_data.get("dd4", "")
+        draw_dd5 = draw_data.get("dd5", "")
+        draw_dd6 = draw_data.get("dd6", "")
+        draw_dd7 = draw_data.get("dd7", "")
+        draw_dd8 = draw_data.get("dd8", "")
+        draw_dd9 = draw_data.get("dd9", "")
+        draw_dd10 = draw_data.get("dd10", "")
+        draw_dd11 = draw_data.get("dd11", "")
+        draw_dd12 = draw_data.get("dd12", "")
+        draw_dd13 = draw_data.get("dd13", "")
+        draw_dd14 = draw_data.get("dd14", "")
+        draw_dd15 = draw_data.get("dd15", "")
+        draw_dd16 = draw_data.get("dd16", "")
+        draw_dd17 = draw_data.get("dd17", "")
+        draw_dd18 = draw_data.get("dd18", "")
+
         # Display
         separator = "=" * 50
         print(f"\n{separator}\nEXPRESS ENTRY DRAW #{draw_number}\n{separator}")
@@ -160,7 +210,104 @@ class ExpressEntryManager:
                 print("\nCould not parse date information")
         
         print(separator)
-    
+
+    def analyze_draws(self):
+        """Analyze draw data from the JSON file and display summary statistics."""
+        if not self.json_path.exists():
+            print("\n❌ Analysis failed: JSON file not found. Please update data first.")
+            return
+
+        try:
+            with open(self.json_path, "r") as f:
+                data = json.load(f)
+            
+            # Convert to DataFrame
+            df = pd.DataFrame(data["rounds"])
+
+            # --- Data Cleaning & Preparation ---
+            # Convert key columns to numeric types for calculation.
+            # 'coerce' will turn any non-numeric values (like 'N/A') into NaN (Not a Number)
+            df['drawDate'] = pd.to_datetime(df['drawDate'], errors='coerce')
+            df['drawSize'] = pd.to_numeric(df['drawSize'], errors='coerce')
+            df['drawCRS'] = pd.to_numeric(df['drawCRS'], errors='coerce')
+
+            # --- Analysis ---
+            try:
+                earliest_date = df['drawDate'].min().date() if not df['drawDate'].isnull().all() else "N/A"
+                earliest_date = earliest_date if isinstance(earliest_date, str) else earliest_date.isoformat()
+                print("earliest_date:", earliest_date)
+                
+                latest_date = df['drawDate'].max().date() if not df['drawDate'].isnull().all() else "N/A"
+                latest_date = latest_date if isinstance(latest_date, str) else latest_date.isoformat()  
+                print("latest_date:", latest_date)
+
+                total_draws = len(df)
+                print("total_draws:", total_draws)
+
+                highest_draw_size = int(df['drawSize'].max()) if not df['drawSize'].isnull().all() else "N/A"
+                print("highest_draw_size:", highest_draw_size)
+
+                average_draw_size = round(df['drawSize'].mean(), 2) if not df['drawSize'].isnull().all() else "N/A"
+                print("average_draw_size:", average_draw_size)
+
+                lowest_draw_size = int(df['drawSize'].min()) if not df['drawSize'].isnull().all() else "N/A"
+                print("lowest_draw_size:", lowest_draw_size)
+
+                cv_draw_size = round(df['drawSize'].std() / df['drawSize'].mean()*100, 2) if not df['drawSize'].isnull().all() and df['drawSize'].mean() != 0 else "N/A"
+                print("cv_draw_size:", cv_draw_size)
+
+                highest_crs = int(df['drawCRS'].max()) if not df['drawCRS'].isnull().all() else "N/A"
+                print("highest_crs:", highest_crs)
+
+                print(df['drawCRS'].dtype)  # Debugging line to check dtype
+                average_crs = round(df['drawCRS'].mean(), 2) if not df['drawCRS'].isnull().all() else "N/A"
+                print("average_crs:", average_crs)
+
+                lowest_crs = int(df['drawCRS'].min()) if not df['drawCRS'].isnull().all() else "N/A"
+                print("lowest_crs:", lowest_crs)
+
+                cv_crs = round(df['drawCRS'].std() / df['drawCRS'].mean()*100, 2) if not df['drawCRS'].isnull().all() and df['drawCRS'].mean() != 0 else "N/A"
+                print("cv_crs:", cv_crs)
+
+            except Exception as e:
+                logger.error(f"Error during analysis calculation: {e}")
+                print("\n❌ Error during analysis calculation.")
+                return None
+            try:
+                analysis = {
+                    "date_range": {
+                        "earliest": earliest_date,
+                        "latest": latest_date
+                    },
+                    "total_draws": total_draws,
+                    "draw_size": {
+                        "highest": highest_draw_size,
+                        "average": average_draw_size,
+                        "lowest": lowest_draw_size,
+                        "coefficient_of_variation": cv_draw_size
+                    },
+                    "scores": {
+                        "highest": highest_crs,
+                        "average": average_crs,
+                        "lowest": lowest_crs,
+                        "coefficient_of_variation": cv_crs
+                    }
+                }
+                with open(self.data_dir / "analysis.json", "w") as f:
+                    json.dump(analysis, f, indent=2)
+            except Exception as e:
+                logger.error(f"Error during analysis calculation or saving: {e}")
+                print("\n❌ Error during analysis calculation or saving.")
+                return None
+            return analysis
+
+        except (json.JSONDecodeError, KeyError) as e:
+            logger.error(f"Failed to analyze JSON file: {e}")
+            print("\n❌ Analysis failed due to a problem with the JSON file.")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred during analysis: {e}")
+            print("\n❌ An unexpected error occurred during analysis.")
+
     def ask_user_confirmation(self, prompt: str) -> bool:
         """Get yes/no confirmation from user."""
         while True:
@@ -176,7 +323,7 @@ def main():
     manager = ExpressEntryManager()
     manager.clear_terminal()
     
-    print("🚀 Express Entry Draw Manager")
+    print("🚀 Express Entry Draw")
     print("=" * 30)
     
     # Check data status
@@ -199,10 +346,28 @@ def main():
                 print("❌ Update failed")
         else:
             print("ℹ️ Using existing data")
+    else:
+        print("✅ Data is already up to date.")
+        if manager.ask_user_confirmation("Force update anyway?"):
+            success, old_count, new_count = manager.update_data()
+            if not success:
+                print(f"✅ Forced update successful! {old_count} → {new_count} draws")
+            else:
+                print("❌ Forced update failed")
+        else:
+            print("ℹ️ No update performed.")
     
     # Display latest draw info
     latest, previous = manager.get_latest_draws()
     manager.format_draw_info(latest, previous)
+
+    if manager.ask_user_confirmation("\nWould you like to see the analysis of draws?"):
+        analysis = manager.analyze_draws()
+        if analysis is not None:
+            print("\n📊 Draw Analysis Summary:")
+            print(analysis)
+        else:
+            print("❌ Analysis could not be performed.")
 
 if __name__ == "__main__":
     main()
