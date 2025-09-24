@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Entry Draws</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Express Entry Draw History</h1>
+    <div id="lastUpdate"></div>
+    <div id="dataContainer"></div>
+
+    <script>
+        fetch('Data/EE.json')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Raw data structure:', data);
+                displayData(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+        function displayData(data) {
+            console.log('Data type:', typeof data);
+            console.log('Keys:', Object.keys(data));
+            
+            // Check if data is an object with a draws array
+            let drawsArray = data;
+            
+            if (data.draws) {
+                drawsArray = data.draws; // If data has a "draws" property
+            } else if (data.rounds) {
+                drawsArray = data.rounds; // Common in Canada's format
+            } else if (Array.isArray(data)) {
+                drawsArray = data; // It's already an array
+            }
+            
+            if (!Array.isArray(drawsArray)) {
+                document.getElementById('dataContainer').innerHTML = 
+                    '<p>Unexpected data format. Check console.</p>';
+                return;
+            }
+
+            // Rest of your table code...
+            let html = '<table><tr><th>Draw Date</th><th>Draw Number</th><th>Score</th><th>Invitations</th><th>Type</th></tr>';
+            
+            drawsArray.forEach(draw => {
+                html += `<tr>
+                    <td>${draw.draw_date || draw.drawDate || 'N/A'}</td>
+                    <td>${draw.draw_number || draw.drawNumber || 'N/A'}</td>
+                    <td>${draw.draw_crs || draw.drawCRS || 'N/A'}</td>
+                    <td>${draw.draw_size || draw.drawSize || 'N/A'}</td>
+                    <td>${draw.draw_type || draw.drawType || 'N/A'}</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            document.getElementById('dataContainer').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
