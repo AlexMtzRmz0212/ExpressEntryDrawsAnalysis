@@ -94,11 +94,17 @@ class ExpressEntryManager:
             data = self.fetch_json_data()
             new_df = self.process_draw_data(data["rounds"])
             new_count = len(new_df)
-            
+
+            # Add today's datetime as metadata
+            # Use local time zone for updated_at
+            local_time = datetime.now().astimezone()
+            data["metadata"] = {
+                "updated_at": local_time.strftime("%Y-%m-%d %H:%M:%S %Z")
+            }
+
             # Save JSON data
             with open(self.json_path, "w") as f:
                 json.dump(data, f, indent=2)
-            
             # Check existing data
             existing_df = self.get_existing_data()
             existing_count = len(existing_df) if existing_df is not None else 0
@@ -275,18 +281,23 @@ class ExpressEntryManager:
                 return None
             try:
                 analysis = {
-                    "date_range": {
+                    "updated":{
+                        "last": data.get("metadata", {}).get("updated_at", "N/A")
+                    },
+                    "draws": {
+                        "total": total_draws
+                    },
+                    "draw date": {
                         "earliest": earliest_date,
                         "latest": latest_date
                     },
-                    "total_draws": total_draws,
-                    "draw_size": {
+                    "size": {
                         "highest": highest_draw_size,
                         "average": average_draw_size,
                         "lowest": lowest_draw_size,
                         "coefficient_of_variation": cv_draw_size
                     },
-                    "scores": {
+                    "score": {
                         "highest": highest_crs,
                         "average": average_crs,
                         "lowest": lowest_crs,

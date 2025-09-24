@@ -8,7 +8,26 @@
 </head>
 <body>
     <h1>Express Entry Draws Analysis</h1>
-    <p>asdf</p>
+    <div id="analysis-data"></div>
+    <script>
+        fetch('Data/analysis.json')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('analysis-data');
+                Object.keys(data).forEach(key1 => {
+                    const innerObj = data[key1];
+                    Object.keys(innerObj).forEach(key2 => {
+                        const p = document.createElement('p');
+                        p.textContent = `${key2} ${key1}: ${innerObj[key2]}`;
+                        container.appendChild(p);
+                    });
+                });
+            })
+            .catch(error => {
+                const container = document.getElementById('analysis-data');
+                container.textContent = 'Error loading JSON data.';
+            });
+    </script>
     <a href="Pages/table.html" class="nav-button">View Express Entry History</a>
 </body>
 </html>
