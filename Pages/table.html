@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Entry Draws</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .back-button { /* Style for the back button */
+            display: inline-block;
+            padding: 8px 16px;
+            margin-bottom: 20px;
+            color: #333;
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-button">&larr; Back to Main Page</a>
+
+    <h1>Express Entry Draw History</h1>
+    <div id="lastUpdate"></div>
+    <div id="dataContainer"></div>
+
+    <script>
+        fetch('../Data/EE.json')
+            .then(response => response.json())
+            .then(data => {
+                displayData(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+        function displayData(data) {
+            let drawsArray = data;
+            
+            if (data.draws) {
+                drawsArray = data.draws;
+            } else if (data.rounds) {
+                drawsArray = data.rounds;
+            } else if (Array.isArray(data)) {
+                drawsArray = data;
+            }
+            
+            if (!Array.isArray(drawsArray)) {
+                document.getElementById('dataContainer').innerHTML = 
+                    '<p>Unexpected data format. Check console.</p>';
+                return;
+            }
+
+            let html = '<table><tr><th>Date</th><th>Number</th><th>Score</th><th>Invitations</th><th>Type</th></tr>';
+            
+            drawsArray.forEach(draw => {
+                html += `<tr>
+                    <td>${draw.draw_date || draw.drawDate || 'N/A'}</td>
+                    <td>${draw.draw_number || draw.drawNumber || 'N/A'}</td>
+                    <td>${draw.draw_crs || draw.drawCRS || 'N/A'}</td>
+                    <td>${draw.draw_size || draw.drawSize || 'N/A'}</td>
+                    <td>${draw.draw_name || draw.drawName || 'N/A'}</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            document.getElementById('dataContainer').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
