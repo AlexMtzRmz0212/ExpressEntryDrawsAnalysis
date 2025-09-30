@@ -45,13 +45,11 @@ jobs:
           from_email = os.getenv("SMTP_FROM_EMAIL")
           to_email_test = os.getenv("SMTP_TO_EMAIL_TEST")
           
-          # Validate environment variables
           if not all([smtp_server, smtp_user, smtp_password, from_email, to_email_test]):
               raise ValueError("Missing required SMTP environment variables")
           m = ExpressEntryManager()
           needs_update, existing_count, api_count = m.check_data_freshness()
-  
-          # Check if new draws were added
+          
           if needs_update:
               print(f'New draw found ({api_count} > {existing_count}). Sending email.')
               m.update_data()
