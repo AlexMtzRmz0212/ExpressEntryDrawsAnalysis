@@ -52,6 +52,7 @@ jobs:
               print(f'New draw found ({api_count} > {existing_count}). Sending email.')
               m.update_data()
               m.analyze_draws()
+              latest, previous = manager.get_latest_draws()
               number, datetime, name, size, crs, since, between = m.format_draw_info(latest, previous)
               manager.send_email(
                 subject=f"New Express Entry Draw #{number} - {name}",
