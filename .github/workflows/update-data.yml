@@ -27,7 +27,7 @@ jobs:
     - name: Run data update script
       run: |
         cd Data
-        python -c "from Draws import ExpressEntryManager; m = ExpressEntryManager(); m.update_data()"
+        python -c "from Draws import ExpressEntryManager; m = ExpressEntryManager(); m.update_data(); m.analyze_data()"
         
     - name: Commit and push if changes
       run: |
