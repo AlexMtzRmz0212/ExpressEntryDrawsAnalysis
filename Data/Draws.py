@@ -6,6 +6,9 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional, Dict, Tuple, Any
 import logging
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -162,32 +165,11 @@ class ExpressEntryManager:
         draw_name = draw_data.get("drawName", "Unknown")
         draw_size = draw_data.get("drawSize", "Unknown")
         min_crs = draw_data.get("drawCRS", "Unknown")
-        draw_text2 = draw_data.get("drawText2", "")
-        draw_cutoff = draw_data.get("drawCutOff", "")
-        draw_distribution_as_on = draw_data.get("drawDistributionAsOn", "")
-        draw_dd1 = draw_data.get("dd1", "")
-        draw_dd2 = draw_data.get("dd2", "")
-        draw_dd3 = draw_data.get("dd3", "")
-        draw_dd4 = draw_data.get("dd4", "")
-        draw_dd5 = draw_data.get("dd5", "")
-        draw_dd6 = draw_data.get("dd6", "")
-        draw_dd7 = draw_data.get("dd7", "")
-        draw_dd8 = draw_data.get("dd8", "")
-        draw_dd9 = draw_data.get("dd9", "")
-        draw_dd10 = draw_data.get("dd10", "")
-        draw_dd11 = draw_data.get("dd11", "")
-        draw_dd12 = draw_data.get("dd12", "")
-        draw_dd13 = draw_data.get("dd13", "")
-        draw_dd14 = draw_data.get("dd14", "")
-        draw_dd15 = draw_data.get("dd15", "")
-        draw_dd16 = draw_data.get("dd16", "")
-        draw_dd17 = draw_data.get("dd17", "")
-        draw_dd18 = draw_data.get("dd18", "")
 
         # Display
         separator = "=" * 50
-        print(f"\n{separator}\nEXPRESS ENTRY DRAW #{draw_number}\n{separator}")
-        print(f"Date: {draw_date_full}")
+        print(f"\n{separator}\nLATEST EXPRESS ENTRY DRAW #{draw_number}\n{separator}")
+        print(f"Date: {draw_datetime}")
         print(f"Type: {draw_name}")
         print(f"Invitations: {draw_size}")
         print(f"Minimum CRS: {min_crs}")
@@ -199,7 +181,7 @@ class ExpressEntryManager:
                 draw_datetime = datetime.strptime(draw_date, "%Y-%m-%d")
                 days_since = (current_date - draw_datetime).days
                 
-                time_msg = "TODAY!" if days_since == 0 else f"{days_since} days ago"
+                time_msg = "TODAY!" if days_since == 0 else f"{days_since} day ago" if days_since == 1 else f"{days_since} days ago"
                 print(f"\nThis draw happened {time_msg}")
                 
                 # Compare with previous draw
@@ -208,14 +190,15 @@ class ExpressEntryManager:
                     if prev_date and prev_date != "Unknown":
                         prev_datetime = datetime.strptime(prev_date, "%Y-%m-%d")
                         days_between = (draw_datetime - prev_datetime).days
-                        prev_crs = previous_draw_data.get("drawCRS", "Unknown")
+                        # prev_crs = previous_draw_data.get("drawCRS", "Unknown")
                         print(f"Days since previous draw: {days_between}")
-                        print(f"Previous draw CRS: {prev_crs}")
+                        # print(f"Previous draw CRS: {prev_crs}")
                         
             except ValueError:
                 print("\nCould not parse date information")
         
         print(separator)
+        return draw_number,draw_datetime, draw_name, draw_size, min_crs, days_since, days_between
 
     def analyze_draws(self):
         """Analyze draw data from the JSON file and display summary statistics."""
@@ -328,6 +311,26 @@ class ExpressEntryManager:
             elif response in ['n', 'no']:
                 return False
             print("Please enter 'y' or 'n'")
+    
+    def send_email(self, subject: str, body: str, to_email: str, from_email: str, smtp_server: str, smtp_port: int, smtp_user: str, smtp_password: str):
+        """Send an email with the given subject and body."""
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = from_email
+            msg['To'] = to_email
+            msg['Subject'] = subject
+
+            msg.attach(MIMEText(body, 'plain'))
+
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+            server.send_message(msg)
+            server.quit()
+
+            logger.info("Email sent successfully")
+        except Exception as e:
+            logger.error(f"Failed to send email: {e}")
 
 def main():
     """Main execution function."""
@@ -367,10 +370,21 @@ def main():
                 print("❌ Forced update failed")
         else:
             print("ℹ️ No update performed.")
-    
+
     # Display latest draw info
     latest, previous = manager.get_latest_draws()
-    manager.format_draw_info(latest, previous)
+    number, datetime, name, size, crs, since, between = manager.format_draw_info(latest, previous)
+
+    manager.send_email(
+        subject=f"New Express Entry Draw #{number} - {name}",
+        body=f"Draw Date: {datetime}\nType: {name}\nInvitations: {size}\nMinimum CRS: {crs}\nThis Draw happened: {since}\nDays Between Previous Draw: {between}",
+        to_email="jesus.mtz.rmz.jamr@gmail.com",
+        from_email="alejandro.martinez.rmz97@gmail.com",
+        smtp_server="smtp.example.com",
+        smtp_port=587,
+        smtp_user="smtp_user",
+        smtp_password="smtp_password"
+    )
 
     if manager.ask_user_confirmation("\nWould you like to see the analysis of draws?"):
         analysis = manager.analyze_draws()
