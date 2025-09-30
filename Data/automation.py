@@ -32,6 +32,6 @@ try:
             smtp_password=smtp_password
         )
     else:
-        print(f'No new draws found ({api_count} <= {existing_count}). Skipping email.')
+        print(f'No new draws found ({api_count} = {existing_count}). Skipping email.')
 except Exception as e:
     print(f"An error occurred: {e}")
