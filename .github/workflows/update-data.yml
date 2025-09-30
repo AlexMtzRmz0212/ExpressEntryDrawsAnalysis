@@ -48,28 +48,28 @@ jobs:
           # Validate environment variables
           if not all([smtp_server, smtp_user, smtp_password, from_email, to_email_test]):
               raise ValueError("Missing required SMTP environment variables")
-        m = ExpressEntryManager()
-        needs_update, existing_count, api_count = m.check_data_freshness()
-
-        # Check if new draws were added
-        if needs_update:
-            print(f'New draw found ({api_count} > {existing_count}). Sending email.')
-            m.update_data()
-            m.analyze_draws()
-            number, datetime, name, size, crs, since, between = m.format_draw_info(latest, previous)
-            manager.send_email(
-              subject=f"New Express Entry Draw #{number} - {name}",
-              body=f"Draw Date: {datetime}\nType: {name}\nInvitations: {size}\nMinimum CRS: {crs}\nThis Draw happened: {since}\nDays Between Previous Draw: {between}",
-              to_email=to_email_test,
-              from_email=from_email,
-              smtp_server=smtp_server,
-              smtp_port=smtp_port,
-              smtp_user=smtp_user,
-              smtp_password=smtp_password
-            )
-        else:
-            print(f'No new draws found ({api_count} <= {existing_count}). Skipping email.')
-        """
+          m = ExpressEntryManager()
+          needs_update, existing_count, api_count = m.check_data_freshness()
+  
+          # Check if new draws were added
+          if needs_update:
+              print(f'New draw found ({api_count} > {existing_count}). Sending email.')
+              m.update_data()
+              m.analyze_draws()
+              number, datetime, name, size, crs, since, between = m.format_draw_info(latest, previous)
+              manager.send_email(
+                subject=f"New Express Entry Draw #{number} - {name}",
+                body=f"Draw Date: {datetime}\nType: {name}\nInvitations: {size}\nMinimum CRS: {crs}\nThis Draw happened: {since}\nDays Between Previous Draw: {between}",
+                to_email=to_email_test,
+                from_email=from_email,
+                smtp_server=smtp_server,
+                smtp_port=smtp_port,
+                smtp_user=smtp_user,
+                smtp_password=smtp_password
+              )
+          else:
+              print(f'No new draws found ({api_count} <= {existing_count}). Skipping email.')
+          """
         
     - name: Commit and push if changes
       run: |
