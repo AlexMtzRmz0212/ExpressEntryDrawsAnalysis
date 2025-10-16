@@ -2,9 +2,14 @@ name: Update Express Entry Data
 
 on:
   schedule:
-    # Run daily at 9 AM UTC (4 AM EST, 5 AM EDT)
-    - cron: '0 9 * * *'
+    # Runs at 5 PM EDT (UTC-4) - During Daylight Saving Time (e.g., March to November)
+    - cron: '0 21 * * *'  
+
+    # Runs at 5 PM EST (UTC-5) - During Standard Time (e.g., November to March)
+    - cron: '0 22 * * *'  
+
   workflow_dispatch:  # Allow manual triggers
+
 
 jobs:
   update-data:
