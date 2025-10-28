@@ -24,7 +24,8 @@
 <body>
     <a href="../index.html" class="back-button">&larr; Back to Main Page</a>
 
-    <h1>Express Entry Draw History</h1>
+    <h1>Theory 1</h1>
+    <h2>Application Inventory by Processing Time in Months</h2>
     <div id="lastUpdate"></div>
     <div id="dataContainer"></div>
 
@@ -58,25 +59,55 @@
             let html = `
             <table>
                 <tr>
-                    <th>Number</th>
                     <th>Date</th>
+                    <th>Name</th>
                     <th>Size</th>
                     <th>CRS</th>
-                    <th>Name</th>
-                    <th>Text 2</th>
-                    <th>Cut Off</th>
+                    <th>0-1</th>
+                    <th>1-2</th>
+                    <th>2-3</th>
+                    <th>3-4</th>
+                    <th>4-5</th>
+                    <th>5-6</th>
+                    <th>6-7</th>
+                    <th>7-8</th>
+                    <th>8-9</th>
+                    <th>9-10</th>
+                    <th>10-11</th>
+                    <th>11-12</th>
+                    <th>12-13</th>
+                    <th>13-14</th>
+                    <th>14-15</th>
+                    <th>15-16</th>
+                    <th>16-17</th>
+                    <th>17-18</th>
                 </tr>
             `;
             
             drawsArray.forEach(draw => {
                 html += `<tr>
-                    <td>${draw.drawNumber || 'N/A'}</td>
-                    <td>${draw.drawDateFull || draw.drawDateTime || draw.drawDate ||  'N/A'}</td>
+                    <td>${draw.drawDateFull || 'N/A'}</td>
+                    <td>${draw.drawName || 'N/A'}</td>
                     <td>${draw.drawSize || 'N/A'}</td>
                     <td>${draw.drawCRS || 'N/A'}</td>
-                    <td>${draw.drawName || 'N/A'}</td>
-                    <td>${draw.drawText2 || 'N/A'}</td>
-                    <td>${draw.drawCutOff || 'N/A'}</td>
+                    <td>${draw.dd1 || 'N/A'}</td>
+                    <td>${draw.dd2 || 'N/A'}</td>
+                    <td>${draw.dd3 || 'N/A'}</td>
+                    <td>${draw.dd4 || 'N/A'}</td>
+                    <td>${draw.dd5 || 'N/A'}</td>
+                    <td>${draw.dd6 || 'N/A'}</td>
+                    <td>${draw.dd7 || 'N/A'}</td>
+                    <td>${draw.dd8 || 'N/A'}</td>
+                    <td>${draw.dd9 || 'N/A'}</td>
+                    <td>${draw.dd10 || 'N/A'}</td>
+                    <td>${draw.dd11 || 'N/A'}</td>
+                    <td>${draw.dd12 || 'N/A'}</td>
+                    <td>${draw.dd13 || 'N/A'}</td>
+                    <td>${draw.dd14 || 'N/A'}</td>
+                    <td>${draw.dd15 || 'N/A'}</td>
+                    <td>${draw.dd16 || 'N/A'}</td>
+                    <td>${draw.dd17 || 'N/A'}</td>
+                    <td>${draw.dd18 || 'N/A'}</td>
                 </tr>`;
             });
             
