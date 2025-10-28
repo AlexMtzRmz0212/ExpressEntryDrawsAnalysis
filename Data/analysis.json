@@ -1,13 +1,13 @@
 {
   "updated": {
-    "last": "2025-10-27 21:16:25 UTC"
+    "last": "2025-10-28 21:17:40 UTC"
   },
   "draws": {
-    "total": 375
+    "total": 376
   },
   "draw date": {
     "earliest": "2015-01-31",
-    "latest": "2025-10-27"
+    "latest": "2025-10-28"
   },
   "size": {
     "highest": 975,
@@ -17,8 +17,8 @@
   },
   "score": {
     "highest": 902,
-    "average": 533.13,
+    "average": 533.12,
     "lowest": 75,
-    "coefficient_of_variation": 25.51
+    "coefficient_of_variation": 25.48
   }
 }
