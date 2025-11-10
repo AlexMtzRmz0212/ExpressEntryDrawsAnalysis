@@ -1,3 +1,7 @@
+""" This used to use CSV 
+but the current one only uses JSON 
+for efficiency and simplicity.
+"""
 import pandas as pd
 import json
 import requests
@@ -20,6 +24,7 @@ class ExpressEntryManager:
     def __init__(self, data_dir: str = "."):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(exist_ok=True)
+        self.csv_path = self.data_dir / "EE.csv"
         self.json_path = self.data_dir / "EE.json"
         self.api_url = "https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json"
         
@@ -70,19 +75,15 @@ class ExpressEntryManager:
             raise
     
     def get_existing_data(self) -> Optional[pd.DataFrame]:
-        """Get existing data from JSON if available."""
+        """Get existing data from CSV if available."""
         try:
-            if self.json_path.exists():
-                with open(self.json_path, "r") as f:
-                    data = json.load(f)
-                df = pd.DataFrame(data["rounds"])
-                # Select only needed columns that exist in the data
-                available_columns = [col for col in self.selected_columns if col in df.columns]
-                logger.info(f"Loaded {len(df)} existing draws from JSON")
-                return df[available_columns]
+            if self.csv_path.exists():
+                df = pd.read_csv(self.csv_path)
+                logger.info(f"Loaded {len(df)} existing draws")
+                return df
             return None
         except Exception as e:
-            logger.error(f"Error reading JSON: {e}")
+            logger.error(f"Error reading CSV: {e}")
             return None
     
     def process_draw_data(self, rounds_data: list) -> pd.DataFrame:
@@ -108,6 +109,9 @@ class ExpressEntryManager:
                 "updated_at": local_time.strftime("%Y-%m-%d %H:%M:%S %Z")
             }
 
+            # Save JSON data
+            with open(self.json_path, "w") as f:
+                json.dump(data, f, indent=2)
             # Check existing data
             existing_df = self.get_existing_data()
             existing_count = len(existing_df) if existing_df is not None else 0
@@ -115,15 +119,12 @@ class ExpressEntryManager:
             # Only update if there are changes
             if existing_count == new_count and existing_df is not None:
                 logger.info("Number of draws unchanged")
-                # Still save to update metadata
-                with open(self.json_path, "w") as f:
-                    json.dump(data, f, indent=2)
-                logger.info(f"Updated metadata: {existing_count} draws")
+                new_df.to_csv(self.csv_path, index=False)
+                logger.info(f"Updated data: {existing_count} → {new_count} draws")
                 return False, existing_count, new_count
             
-            # Save new data to JSON
-            with open(self.json_path, "w") as f:
-                json.dump(data, f, indent=2)
+            # Save new data
+            new_df.to_csv(self.csv_path, index=False)
             logger.info(f"Updated data: {existing_count} → {new_count} draws")
             return True, existing_count, new_count
             
@@ -212,7 +213,7 @@ class ExpressEntryManager:
         try:
             with open(self.json_path, "r") as f:
                 data = json.load(f)
-
+            
             # Convert to DataFrame
             df = pd.DataFrame(data["rounds"])
 
@@ -294,8 +295,8 @@ class ExpressEntryManager:
                 with open(self.data_dir / "analysis.json", "w") as f:
                     json.dump(analysis, f, indent=2)
             except Exception as e:
-                logger.error(f"Error during analysis saving: {e}")
-                print("\n❌ Error during analysis saving.")
+                logger.error(f"Error during analysis calculation or saving: {e}")
+                print("\n❌ Error during analysis calculation or saving.")
                 return None
             return analysis
 
@@ -336,112 +337,67 @@ class ExpressEntryManager:
         except Exception as e:
             logger.error(f"Failed to send email: {e}")
 
-    def get_draw_times_for_analysis(self) -> list:
-        """Extract draw times for web visualization."""
-        try:
-            with open(self.json_path, "r") as f:
-                data = json.load(f)
-            
-            draws_data = []
-            for draw in data["rounds"]:
-                draw_info = {
-                    "drawNumber": draw.get("drawNumber"),
-                    "drawDateTime": draw.get("drawDateTime"),
-                    "drawName": draw.get("drawName"),
-                    "drawSize": draw.get("drawSize"),
-                    "drawCRS": draw.get("drawCRS")
-                }
-                draws_data.append(draw_info)
-            
-            return draws_data
-        except Exception as e:
-            logger.error(f"Error extracting draw times: {e}")
-            return []
-    
-    def analyze_draw_times(self) -> dict:
-        """Analyze draw times and return statistics for web visualization."""
-        try:
-            with open(self.json_path, "r") as f:
-                data = json.load(f)
-            
-            draws = data["rounds"]
-            hour_counts = [0] * 24
-            valid_times = []
-            
-            for draw in draws:
-                draw_time = draw.get("drawDateTime")
-                if draw_time:
-                    try:
-                        # Parse the datetime string
-                        dt = datetime.fromisoformat(draw_time.replace('Z', '+00:00'))
-                        hour = dt.hour
-                        hour_counts[hour] += 1
-                        valid_times.append({
-                            "drawNumber": draw.get("drawNumber"),
-                            "hour": hour,
-                            "time": dt.strftime("%H:%M"),
-                            "date": dt.strftime("%Y-%m-%d"),
-                            "drawName": draw.get("drawName")
-                        })
-                    except (ValueError, AttributeError) as e:
-                        logger.warning(f"Could not parse time: {draw_time} - {e}")
-                        continue
-            
-            # Calculate statistics
-            total_draws = len(valid_times)
-            most_common_hour = hour_counts.index(max(hour_counts)) if total_draws > 0 else None
-            avg_hour = sum(hour * count for hour, count in enumerate(hour_counts)) / total_draws if total_draws > 0 else None
-            
-            time_analysis = {
-                "total_draws_with_times": total_draws,
-                "hour_distribution": hour_counts,
-                "most_common_hour": most_common_hour,
-                "average_hour": round(avg_hour, 2) if avg_hour else None,
-                "draw_times": valid_times,
-                "analysis_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-            
-            # Save time analysis separately
-            with open(self.data_dir / "time_analysis.json", "w") as f:
-                json.dump(time_analysis, f, indent=2)
-            
-            logger.info(f"Time analysis completed: {total_draws} draws with valid times")
-            return time_analysis
-            
-        except Exception as e:
-            logger.error(f"Error analyzing draw times: {e}")
-            return {}
-        
-        
 def main():
-    """Quick test for the new time analysis features."""
+    """Main execution function."""
     manager = ExpressEntryManager()
+    manager.clear_terminal()
     
-    print("🧪 Testing new time analysis features...")
+    print("🚀 Express Entry Draw")
+    print("=" * 30)
     
-    # Test 1: Update data
-    print("\n1. Updating data...")
-    success, old_count, new_count = manager.update_data()
-    print(f"   Update result: {success}, {old_count} -> {new_count} draws")
+    # Check data status
+    needs_update, existing_count, api_count = manager.check_data_freshness()
     
-    # Test 2: Get draw times for analysis
-    print("\n2. Extracting draw times...")
-    draw_times = manager.get_draw_times_for_analysis()
-    print(f"   Found {len(draw_times)} draws with time data")
-    
-    if draw_times:
-        # Show first few draws with their times
-        print("   Sample draw times:")
-        for i, draw in enumerate(draw_times[:3]):
-            print(f"   Draw #{draw['drawNumber']}: {draw['drawDateTime']}")
-    
-    # Test 3: Run analysis (this should now save EE.json for web)
-    print("\n3. Running analysis...")
-    analysis = manager.analyze_draws()
-    if analysis:
-        print("   ✅ Analysis completed and files saved")
+    # Handle updates
+    if needs_update or existing_count == 0:
+        if existing_count == 0:
+            print("📥 No data found. Download latest draws?")
+        else:
+            print(f"📊 Current draws: {existing_count}")
+            print(f"📈 Available online: {api_count}")
+            print(f"🆕 New draws available: {api_count - existing_count}")
+        
+        if manager.ask_user_confirmation("Update data?"):
+            success, old_count, new_count = manager.update_data()
+            if success:
+                print(f"✅ Updated successfully! {old_count} → {new_count} draws")
+            else:
+                print("❌ Update failed")
+        else:
+            print("ℹ️ Using existing data")
     else:
-        print("   ❌ Analysis failed")
+        print("✅ Data is already up to date.")
+        if manager.ask_user_confirmation("Force update anyway?"):
+            success, old_count, new_count = manager.update_data()
+            if not success:
+                print(f"✅ Forced update successful! {old_count} → {new_count} draws")
+            else:
+                print("❌ Forced update failed")
+        else:
+            print("ℹ️ No update performed.")
+
+    # Display latest draw info
+    latest, previous = manager.get_latest_draws()
+    number, datetime, name, size, crs, since, between = manager.format_draw_info(latest, previous)
+
+    manager.send_email(
+        subject=f"New Express Entry Draw #{number} - {name}",
+        body=f"Draw Date: {datetime}\nType: {name}\nInvitations: {size}\nMinimum CRS: {crs}\nThis Draw happened: {since}\nDays Between Previous Draw: {between}",
+        to_email="jesus.mtz.rmz.jamr@gmail.com",
+        from_email="alejandro.martinez.rmz97@gmail.com",
+        smtp_server="smtp.example.com",
+        smtp_port=587,
+        smtp_user="smtp_user",
+        smtp_password="smtp_password"
+    )
+
+    if manager.ask_user_confirmation("\nWould you like to see the analysis of draws?"):
+        analysis = manager.analyze_draws()
+        if analysis is not None:
+            print("\n📊 Draw Analysis Summary:")
+            print(analysis)
+        else:
+            print("❌ Analysis could not be performed.")
 
 if __name__ == "__main__":
     main()

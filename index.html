@@ -3,32 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Express Entry</title>
+    <title>Express Entry Draw Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="Pages/style.css">
 </head>
 <body>
-    <h1>Express Entry Draws Analysis</h1>
-    <div id="analysis-data"></div>
+    <div class="container">
+        <header>
+            <h1>🎯 Express Entry Draw Analysis</h1>
+            <p class="subtitle">Comprehensive tracking and analysis of Canadian Express Entry draws</p>
+        </header>
+
+        <div class="stats-grid" id="analysis-data">
+            <!-- Stats will be populated here -->
+        </div>
+
+        <div class="chart-container">
+            <h2>Draw Times Analysis</h2>
+            <canvas id="timeChart"></canvas>
+        </div>
+
+        <div class="navigation">
+            <a href="Pages/table.html" class="nav-button">
+                📊 View Express Entry History
+            </a>
+            <a href="Pages/DD1-18.html" class="nav-button">
+                🔍 Figuring out DD1-18
+            </a>
+        </div>
+    </div>
+
     <script>
-        fetch('Data/analysis.json')
-            .then(response => response.json())
-            .then(data => {
-                const container = document.getElementById('analysis-data');
-                Object.keys(data).forEach(key1 => {
-                    const innerObj = data[key1];
-                    Object.keys(innerObj).forEach(key2 => {
-                        const p = document.createElement('p');
-                        p.textContent = `${key2} ${key1}: ${innerObj[key2]}`;
-                        container.appendChild(p);
-                    });
-                });
-            })
-            .catch(error => {
-                const container = document.getElementById('analysis-data');
-                container.textContent = 'Error loading JSON data.';
+        // Function to extract time from drawDateTime
+        function extractTime(drawDateTime) {
+            if (!drawDateTime) return null;
+            
+            try {
+                // Handle different date formats
+                const date = new Date(drawDateTime);
+                if (isNaN(date.getTime())) {
+                    // Try parsing as ISO string or other formats
+                    const timestamp = Date.parse(drawDateTime);
+                    if (!isNaN(timestamp)) {
+                        return new Date(timestamp);
+                    }
+                    return null;
+                }
+                return date;
+            } catch (e) {
+                console.error('Error parsing date:', drawDateTime, e);
+                return null;
+            }
+        }
+
+        // Function to format time for display
+        function formatTime(date) {
+            if (!date) return 'Unknown';
+            return date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
             });
+        }
+
+        // Function to get hour of day for analysis
+        function getHourOfDay(date) {
+            if (!date) return null;
+            return date.getHours();
+        }
+
+        // Function to create time distribution chart
+        function createTimeChart(drawsData) {
+            const ctx = document.getElementById('timeChart').getContext('2d');
+            
+            // Extract times and analyze distribution
+            const times = drawsData.map(draw => {
+                const date = extractTime(draw.drawDateTime);
+                return date ? getHourOfDay(date) : null;
+            }).filter(hour => hour !== null);
+
+            // Count draws by hour
+            const hourCounts = Array(24).fill(0);
+            times.forEach(hour => {
+                hourCounts[hour]++;
+            });
+
+            // Prepare chart data
+            const labels = Array.from({length: 24}, (_, i) => {
+                const hour = i % 12 || 12;
+                const period = i < 12 ? 'AM' : 'PM';
+                return `${hour} ${period}`;
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Draws',
+                        data: hourCounts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribution of Draw Times by Hour of Day',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Draws'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time of Day'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load and display data
+        Promise.all([
+            fetch('Data/analysis.json').then(r => r.json()),
+            fetch('Data/EE.json').then(r => r.json())
+        ])
+        .then(([analysisData, drawsData]) => {
+            // Display analysis data in a nice grid
+            const container = document.getElementById('analysis-data');
+            
+            Object.keys(analysisData).forEach(category => {
+                const section = document.createElement('div');
+                section.className = 'stats-section';
+                
+                const title = document.createElement('h3');
+                title.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                section.appendChild(title);
+                
+                const statsGrid = document.createElement('div');
+                statsGrid.className = 'stats-inner-grid';
+                
+                Object.keys(analysisData[category]).forEach(stat => {
+                    const statCard = document.createElement('div');
+                    statCard.className = 'stat-card';
+                    
+                    const value = document.createElement('div');
+                    value.className = 'stat-value';
+                    value.textContent = analysisData[category][stat];
+                    
+                    const label = document.createElement('div');
+                    label.className = 'stat-label';
+                    label.textContent = stat.replace(/_/g, ' ');
+                    
+                    statCard.appendChild(value);
+                    statCard.appendChild(label);
+                    statsGrid.appendChild(statCard);
+                });
+                
+                section.appendChild(statsGrid);
+                container.appendChild(section);
+            });
+
+            // Create time analysis chart
+            if (drawsData.rounds && drawsData.rounds.length > 0) {
+                createTimeChart(drawsData.rounds);
+                
+                // Display latest draw time
+                const latestDraw = drawsData.rounds[0];
+                const latestTime = extractTime(latestDraw.drawDateTime);
+                if (latestTime) {
+                    const timeInfo = document.createElement('div');
+                    timeInfo.className = 'time-info';
+                    timeInfo.innerHTML = `
+                        <h3>Latest Draw Time</h3>
+                        <p>Draw #${latestDraw.drawNumber} occurred at ${formatTime(latestTime)}</p>
+                        <p>Date: ${latestTime.toLocaleDateString()}</p>
+                    `;
+                    document.querySelector('.chart-container').appendChild(timeInfo);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading data:', error);
+            const container = document.getElementById('analysis-data');
+            container.innerHTML = `
+                <div class="error-message">
+                    <h3>⚠️ Error Loading Data</h3>
+                    <p>Please make sure the JSON files are available in the Data folder.</p>
+                </div>
+            `;
+        });
     </script>
-    <a href="Pages/table.html" class="nav-button">View Express Entry History</a>
-    <a href="Pages/DD1-18.html" class="nav-button">Figuring out DD1-18</a>
 </body>
 </html>
