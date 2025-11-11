@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Entry Time Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📈 Express Entry Time Analysis</h1>
+            <p class="subtitle">Analysis of draw timing patterns and trends</p>
+        </header>
+
+        <div class="navigation">
+            <a href="../index.html" class="nav-button">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+        <div class="chart-container">
+            <h2>Draw Times Distribution (Bar Chart)</h2>
+            <canvas id="timeBarChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Draw Times Over History (Line Chart)</h2>
+            <canvas id="timeLineChart"></canvas>
+        </div>
+
+        <div class="time-stats" id="timeStats">
+            <!-- Time statistics will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        // Load and display time analysis
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('../Data/time_analysis.json')
+                .then(response => response.json())
+                .then(timeData => {
+                    createTimeBarChart(timeData);
+                    createTimeLineChart(timeData);
+                    displayTimeStats(timeData);
+                })
+                .catch(error => {
+                    console.error('Error loading time analysis:', error);
+                    document.getElementById('timeStats').innerHTML = `
+                        <div class="error-message">
+                            <p>Could not load time analysis data.</p>
+                        </div>
+                    `;
+                });
+        });
+
+        // Create time distribution bar chart
+        function createTimeBarChart(timeData) {
+            const ctx = document.getElementById('timeBarChart').getContext('2d');
+            const hourDistribution = timeData.hour_distribution || [];
+
+            const labels = Array.from({length: 24}, (_, i) => {
+                const hour = i % 12 || 12;
+                const period = i < 12 ? 'AM' : 'PM';
+                return `${hour} ${period}`;
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Draws',
+                        data: hourDistribution,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribution of Draw Times by Hour of Day',
+                            font: { size: 16 }
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Number of Draws' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Time of Day' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create time trend line chart - showing actual draw times over history
+        function createTimeLineChart(timeData) {
+            const ctx = document.getElementById('timeLineChart').getContext('2d');
+            
+            // Use the draw_timeline data for the line chart
+            const drawTimeline = timeData.draw_timeline || [];
+            
+            if (drawTimeline.length === 0) {
+                console.warn("No timeline data available for line chart");
+                return;
+            }
+            
+            const labels = drawTimeline.map(item => {
+                const date = new Date(item.datetime);
+                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            });
+            
+            const timeDataPoints = drawTimeline.map(item => item.time);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Draw Time (Hour of Day)',
+                        data: timeDataPoints,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Draw Times Throughout History',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const hour = context.parsed.y;
+                                    const draw = drawTimeline[context.dataIndex];
+                                    const displayHour = Math.floor(hour);
+                                    const minutes = Math.round((hour - displayHour) * 60);
+                                    const period = displayHour < 12 ? 'AM' : 'PM';
+                                    const displayHour12 = displayHour % 12 || 12;
+                                    return `Time: ${displayHour12}:${minutes.toString().padStart(2, '0')} ${period} (Draw #${draw.drawNumber})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: { 
+                                display: true, 
+                                text: 'Time of Day' 
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    const hour = Math.floor(value);
+                                    const minutes = Math.round((value - hour) * 60);
+                                    const period = hour < 12 ? 'AM' : 'PM';
+                                    const displayHour = hour % 12 || 12;
+                                    return `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`;
+                                }
+                            },
+                            min: 0,
+                            max: 24
+                        },
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Display time statistics
+        function displayTimeStats(timeData) {
+            const container = document.getElementById('timeStats');
+            const mostCommonHour = timeData.most_common_hour;
+            const avgHour = timeData.average_hour;
+            
+            const formatHour = (hour) => {
+                if (hour === null || hour === undefined) return 'N/A';
+                const period = hour < 12 ? 'AM' : 'PM';
+                const displayHour = hour % 12 || 12;
+                return `${displayHour} ${period}`;
+            };
+
+            container.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${timeData.total_draws_with_times || 0}</div>
+                        <div class="stat-label">Draws with Time Data</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatHour(mostCommonHour)}</div>
+                        <div class="stat-label">Most Common Time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatHour(Math.round(avgHour))}</div>
+                        <div class="stat-label">Average Time</div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

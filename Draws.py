@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import requests
 import os
+import re
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional, Dict, Tuple, Any
@@ -20,7 +21,7 @@ class ExpressEntryManager:
     def __init__(self, data_dir: str = "."):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(exist_ok=True)
-        self.json_path = self.data_dir / "EE.json"
+        self.json_path = self.data_dir / "Data/EE.json"
         self.api_url = "https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json"
         
         # Define columns to keep (reduced for efficiency)
@@ -91,8 +92,98 @@ class ExpressEntryManager:
         
         # Select only needed columns that exist in the data
         available_columns = [col for col in self.selected_columns if col in df.columns]
-        return df[available_columns].sort_values('drawDate',ascending=False).reset_index(drop=True)    #.sort_values('drawNumber', ascending=False).reset_index(drop=True)
+        return df[available_columns].sort_values('drawDate',ascending=False).reset_index(drop=True)
     
+    def parse_draw_datetime(self, datetime_str: str) -> Optional[datetime]:
+        """Parse various datetime formats found in the data."""
+        if not datetime_str or not isinstance(datetime_str, str):
+            return None
+        
+        # Clean the string
+        datetime_str = datetime_str.strip()
+        
+        # Handle specific problematic patterns first
+        
+        # Pattern 1: "January 23, 2025 2025-01-23 15:30:04 UTC" (duplicate dates)
+        if "202" in datetime_str and datetime_str.count("202") > 1:
+            try:
+                # Extract the ISO datetime part (YYYY-MM-DD HH:MM:SS)
+                for part in datetime_str.split():
+                    if part.startswith("202") and "-" in part and ":" in " ".join(datetime_str.split()[datetime_str.split().index(part):]):
+                        # Find the time part
+                        parts = datetime_str.split()
+                        iso_index = parts.index(part)
+                        if iso_index + 1 < len(parts) and ":" in parts[iso_index + 1]:
+                            iso_str = f"{parts[iso_index]} {parts[iso_index + 1]} UTC"
+                            return datetime.strptime(iso_str, "%Y-%m-%d %H:%M:%S UTC")
+            except (ValueError, IndexError):
+                pass
+        
+        # Pattern 2: "May 31, 2024 at12:48:30 UTC" (missing space after 'at')
+        if "at" in datetime_str and "at " not in datetime_str:
+            datetime_str = datetime_str.replace("at", "at ")
+        
+        # Pattern 3: Handle various comma and spacing issues
+        datetime_str = datetime_str.replace("  ", " ")  # Remove double spaces
+        
+        # Pattern 4: Handle "AM/PM" inconsistencies (like "15:48:39 AM")
+        # Remove AM/PM when time is clearly in 24-hour format
+        time_match = re.search(r'(\d{1,2}:\d{2}:\d{2})\s*(AM|PM)', datetime_str, re.IGNORECASE)
+        if time_match:
+            time_part, am_pm = time_match.groups()
+            hour = int(time_part.split(':')[0])
+            if hour >= 13:  # If hour is 13 or more, it's already 24-hour format
+                datetime_str = datetime_str.replace(f" {am_pm}", "").replace(am_pm, "")
+        
+        # Pattern 5: Handle "March 01, 2023, at 17:24:39 UTC" (comma before 'at')
+        datetime_str = re.sub(r',\s*at\s+', ' at ', datetime_str)
+        
+        # Pattern 6: Handle "February 02 2022 at 14:16:27 UTC" (missing comma in date)
+        # Add comma after day if missing: "February 02 2022" -> "February 02, 2022"
+        date_part_match = re.search(r'([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})', datetime_str)
+        if date_part_match and ',' not in datetime_str:
+            month, day, year = date_part_match.groups()
+            datetime_str = datetime_str.replace(f"{month} {day} {year}", f"{month} {day}, {year}")
+        
+        # Try multiple standard formats
+        formats_to_try = [
+            "%B %d, %Y at %H:%M:%S UTC",        # "January 31, 2015 at 11:59:48 UTC"
+            "%B %d, %Y %H:%M:%S UTC",           # "March 20, 2023 14:30:00 UTC" 
+            "%B %d, %Y %H:%M:%S %p UTC",        # "October 25, 2023 03:48:39 PM UTC"
+            "%B %d,%Y %H:%M:%S UTC",            # "January 31,2015 at 11:59:48 UTC"
+            "%B %d, %Y, %H:%M:%S UTC",          # "November 1, 2017, at 12:55:44 UTC"
+            "%B %d, %Y, at %H:%M:%S UTC",       # "March 01, 2023, at 17:24:39 UTC"
+            "%B %d %Y %H:%M:%S UTC",            # "February 02 2022 at 14:16:27 UTC" (after fix)
+            "%Y-%m-%d %H:%M:%S UTC",            # "2025-01-23 15:30:04 UTC"
+            "%B %d, %Y %H:%M:%S",               # No timezone
+            "%B %d, %Y at %H:%M:%S",            # No timezone with 'at'
+        ]
+        
+        for fmt in formats_to_try:
+            try:
+                return datetime.strptime(datetime_str, fmt)
+            except ValueError:
+                continue
+        
+        # Final attempt: More flexible parsing for really problematic cases
+        try:
+            # Extract just the date part using regex
+            date_match = re.search(r'([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})', datetime_str)
+            if date_match:
+                month, day, year = date_match.groups()
+                # Extract time part
+                time_match = re.search(r'(\d{1,2}:\d{2}:\d{2})', datetime_str)
+                if time_match:
+                    time_str = time_match.group(1)
+                    # Create a basic datetime
+                    base_datetime = datetime.strptime(f"{month} {day} {year} {time_str}", "%B %d %Y %H:%M:%S")
+                    return base_datetime
+        except ValueError:
+            pass
+        
+        logger.warning(f"Could not parse datetime: {datetime_str}")
+        return None
+        
     def update_data(self) -> Tuple[bool, int, int]:
         """Update draw data from API. Returns (success, existing_count, new_count)."""
         try:
@@ -164,7 +255,7 @@ class ExpressEntryManager:
         draw_number = draw_data.get("drawNumber", "Unknown")
         draw_date = draw_data.get("drawDate", "Unknown")
         draw_date_full = draw_data.get("drawDateFull", draw_date)
-        draw_datetime = draw_data.get("drawDateTime", "")
+        draw_datetime_str = draw_data.get("drawDateTime", "")
         draw_name = draw_data.get("drawName", "Unknown")
         draw_size = draw_data.get("drawSize", "Unknown")
         min_crs = draw_data.get("drawCRS", "Unknown")
@@ -172,7 +263,7 @@ class ExpressEntryManager:
         # Display
         separator = "=" * 50
         print(f"\n{separator}\nLATEST EXPRESS ENTRY DRAW #{draw_number}\n{separator}")
-        print(f"Date: {draw_datetime}")
+        print(f"Date: {draw_datetime_str}")
         print(f"Type: {draw_name}")
         print(f"Invitations: {draw_size}")
         print(f"Minimum CRS: {min_crs}")
@@ -201,7 +292,7 @@ class ExpressEntryManager:
                 print("\nCould not parse date information")
         
         print(separator)
-        return draw_number,draw_datetime, draw_name, draw_size, min_crs, days_since, days_between
+        return draw_number, draw_datetime, draw_name, draw_size, min_crs, days_since, days_between
 
     def analyze_draws(self):
         """Analyze draw data from the JSON file and display summary statistics."""
@@ -291,12 +382,21 @@ class ExpressEntryManager:
                         "coefficient_of_variation": cv_crs
                     }
                 }
-                with open(self.data_dir / "analysis.json", "w") as f:
+                with open(self.data_dir / "Data/analysis.json", "w") as f:
                     json.dump(analysis, f, indent=2)
             except Exception as e:
                 logger.error(f"Error during analysis saving: {e}")
                 print("\n❌ Error during analysis saving.")
                 return None
+
+            # Run time analysis
+            time_analysis = self.analyze_draw_times()
+            
+            # Save full draws data for web visualization
+            with open(self.data_dir / "Data/EE.json", "w") as f:
+                json.dump(data, f, indent=2)
+                
+            print(f"✅ Time analysis: {time_analysis.get('total_draws_with_times', 0)} draws with times")
             return analysis
 
         except (json.JSONDecodeError, KeyError) as e:
@@ -305,16 +405,6 @@ class ExpressEntryManager:
         except Exception as e:
             logger.error(f"An unexpected error occurred during analysis: {e}")
             print("\n❌ An unexpected error occurred during analysis.")
-
-    def ask_user_confirmation(self, prompt: str) -> bool:
-        """Get yes/no confirmation from user."""
-        while True:
-            response = input(f"{prompt} (y/n): ").strip().lower()
-            if response in ['y', 'yes']:
-                return True
-            elif response in ['n', 'no']:
-                return False
-            print("Please enter 'y' or 'n'")
     
     def send_email(self, subject: str, body: str, to_email: str, from_email: str, smtp_server: str, smtp_port: int, smtp_user: str, smtp_password: str):
         """Send an email with the given subject and body."""
@@ -367,25 +457,43 @@ class ExpressEntryManager:
             draws = data["rounds"]
             hour_counts = [0] * 24
             valid_times = []
+            draw_timeline = []  # For the line chart
             
             for draw in draws:
                 draw_time = draw.get("drawDateTime")
+                
                 if draw_time:
-                    try:
-                        # Parse the datetime string
-                        dt = datetime.fromisoformat(draw_time.replace('Z', '+00:00'))
-                        hour = dt.hour
+                    parsed_time = self.parse_draw_datetime(draw_time)
+                    if parsed_time:
+                        hour = parsed_time.hour
                         hour_counts[hour] += 1
+                        
+                        # Add to valid times for detailed analysis
                         valid_times.append({
                             "drawNumber": draw.get("drawNumber"),
                             "hour": hour,
-                            "time": dt.strftime("%H:%M"),
-                            "date": dt.strftime("%Y-%m-%d"),
-                            "drawName": draw.get("drawName")
+                            "time": parsed_time.strftime("%H:%M"),
+                            "date": parsed_time.strftime("%Y-%m-%d"),
+                            "datetime_iso": parsed_time.isoformat(),
+                            "drawName": draw.get("drawName"),
+                            "original_string": draw_time
                         })
-                    except (ValueError, AttributeError) as e:
-                        logger.warning(f"Could not parse time: {draw_time} - {e}")
-                        continue
+                        
+                        # Add to timeline for line chart (chronological order)
+                        draw_timeline.append({
+                            "date": parsed_time.strftime("%Y-%m-%d"),
+                            "datetime": parsed_time.isoformat(),
+                            "time": parsed_time.hour + parsed_time.minute/60,  # Decimal hour for plotting
+                            "hour": hour,
+                            "minute": parsed_time.minute,
+                            "drawNumber": draw.get("drawNumber"),
+                            "drawName": draw.get("drawName"),
+                            "drawSize": draw.get("drawSize"),
+                            "drawCRS": draw.get("drawCRS")
+                        })
+            
+            # Sort timeline by date for proper line chart ordering
+            draw_timeline.sort(key=lambda x: x["datetime"])
             
             # Calculate statistics
             total_draws = len(valid_times)
@@ -398,11 +506,12 @@ class ExpressEntryManager:
                 "most_common_hour": most_common_hour,
                 "average_hour": round(avg_hour, 2) if avg_hour else None,
                 "draw_times": valid_times,
+                "draw_timeline": draw_timeline,  # This is for the line chart
                 "analysis_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             
             # Save time analysis separately
-            with open(self.data_dir / "time_analysis.json", "w") as f:
+            with open(self.data_dir / "Data/time_analysis.json", "w") as f:
                 json.dump(time_analysis, f, indent=2)
             
             logger.info(f"Time analysis completed: {total_draws} draws with valid times")
@@ -411,11 +520,13 @@ class ExpressEntryManager:
         except Exception as e:
             logger.error(f"Error analyzing draw times: {e}")
             return {}
-        
-        
+
+
 def main():
     """Quick test for the new time analysis features."""
     manager = ExpressEntryManager()
+    
+    manager.clear_terminal()
     
     print("🧪 Testing new time analysis features...")
     
@@ -442,16 +553,21 @@ def main():
         print("   ✅ Analysis completed and files saved")
     else:
         print("   ❌ Analysis failed")
+    
+    # Test 4: Test datetime parsing
+    print("\n4. Testing datetime parsing...")
+    test_dates = [
+        "January 31, 2015 at 11:59:48 UTC",
+        "March 20, 2023 at 14:30:00 UTC", 
+        "December 5, 2024 at 08:15:30 UTC",
+        "January 23, 2025 2025-01-23 15:30:04 UTC",
+        "May 31, 2024 at12:48:30 UTC",
+        "October 25, 2023 15:48:39 AM UTC"
+    ]
+    for test_date in test_dates:
+        parsed = manager.parse_draw_datetime(test_date)
+        print(f"   '{test_date}' -> {parsed}")
+
 
 if __name__ == "__main__":
     main()
-
-# Usage:
-# # Run the main application
-# python Draws.py
-
-# # Just update data (for automation)
-# python -c "from Draws import ExpressEntryManager; m = ExpressEntryManager(); m.update_data()"
-
-# # Get latest draw info only
-# python -c "from Draws import ExpressEntryManager; m = ExpressEntryManager(); latest, prev = m.get_latest_draws(); m.format_draw_info(latest, prev)"
