@@ -497,7 +497,36 @@ class ExpressEntryManager:
             
             # Calculate statistics
             total_draws = len(valid_times)
-            most_common_hour = hour_counts.index(max(hour_counts)) if total_draws > 0 else None
+            #most_common_hour = hour_counts.index(max(hour_counts)) if total_draws > 0 else None
+            if total_draws > 0:
+                max_count = max(hour_counts)
+                max_indices = [i for i, c in enumerate(hour_counts) if c == max_count]
+                if max_indices:
+                    # group consecutive hours into ranges
+                    ranges = []
+                    start = end = max_indices[0]
+                    for idx in max_indices[1:]:
+                        if idx == end + 1:
+                            end = idx
+                        else:
+                            ranges.append((start, end))
+                            start = end = idx
+                    ranges.append((start, end))
+                    # pick the longest consecutive range (tie -> earliest)
+                    best_start, best_end = max(ranges, key=lambda r: (r[1] - r[0] + 1, -r[0]))
+                    def _fmt_hour(h: int) -> str:
+                        h_mod = h % 24
+                        suffix = "AM" if h_mod < 12 else "PM"
+                        hour12 = h_mod % 12
+                        if hour12 == 0:
+                            hour12 = 12
+                        return f"{hour12} {suffix}"
+                    # format as "best_start AM/PM - best_end+1 AM/PM"
+                    most_common_hour = f"{_fmt_hour(best_start)} - {_fmt_hour(best_end + 1)}"
+                else:
+                    most_common_hour = None
+            else:
+                most_common_hour = None
             avg_hour = sum(hour * count for hour, count in enumerate(hour_counts)) / total_draws if total_draws > 0 else None
             
             time_analysis = {
@@ -540,12 +569,6 @@ def main():
     draw_times = manager.get_draw_times_for_analysis()
     print(f"   Found {len(draw_times)} draws with time data")
     
-    if draw_times:
-        # Show first few draws with their times
-        print("   Sample draw times:")
-        for i, draw in enumerate(draw_times[:3]):
-            print(f"   Draw #{draw['drawNumber']}: {draw['drawDateTime']}")
-    
     # Test 3: Run analysis (this should now save EE.json for web)
     print("\n3. Running analysis...")
     analysis = manager.analyze_draws()
@@ -553,20 +576,6 @@ def main():
         print("   ✅ Analysis completed and files saved")
     else:
         print("   ❌ Analysis failed")
-    
-    # Test 4: Test datetime parsing
-    print("\n4. Testing datetime parsing...")
-    test_dates = [
-        "January 31, 2015 at 11:59:48 UTC",
-        "March 20, 2023 at 14:30:00 UTC", 
-        "December 5, 2024 at 08:15:30 UTC",
-        "January 23, 2025 2025-01-23 15:30:04 UTC",
-        "May 31, 2024 at12:48:30 UTC",
-        "October 25, 2023 15:48:39 AM UTC"
-    ]
-    for test_date in test_dates:
-        parsed = manager.parse_draw_datetime(test_date)
-        print(f"   '{test_date}' -> {parsed}")
 
 
 if __name__ == "__main__":

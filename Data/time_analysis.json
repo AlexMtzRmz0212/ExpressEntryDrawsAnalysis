@@ -1,5 +1,5 @@
 {
-  "total_draws_with_times": 378,
+  "total_draws_with_times": 380,
   "hour_distribution": [
     5,
     1,
@@ -12,12 +12,12 @@
     0,
     0,
     4,
-    29,
+    30,
     64,
     82,
     82,
     50,
-    35,
+    36,
     13,
     2,
     0,
@@ -26,9 +26,27 @@
     0,
     5
   ],
-  "most_common_hour": 13,
+  "most_common_hour": "1 PM - 3 PM",
   "average_hour": 13.45,
   "draw_times": [
+    {
+      "drawNumber": "379",
+      "hour": 11,
+      "time": "11:53",
+      "date": "2025-11-14",
+      "datetime_iso": "2025-11-14T11:53:39",
+      "drawName": "Healthcare and social services occupations (Version 2)",
+      "original_string": "November 14, 2025 at 11:53:39 UTC"
+    },
+    {
+      "drawNumber": "378",
+      "hour": 16,
+      "time": "16:45",
+      "date": "2025-11-12",
+      "datetime_iso": "2025-11-12T16:45:28",
+      "drawName": "Canadian Experience Class",
+      "original_string": "November 12, 2025 at 16:45:28 UTC"
+    },
     {
       "drawNumber": "377",
       "hour": 15,
@@ -7590,7 +7608,29 @@
       "drawName": "Provincial Nominee Program",
       "drawSize": "714",
       "drawCRS": "738"
+    },
+    {
+      "date": "2025-11-12",
+      "datetime": "2025-11-12T16:45:28",
+      "time": 16.75,
+      "hour": 16,
+      "minute": 45,
+      "drawNumber": "378",
+      "drawName": "Canadian Experience Class",
+      "drawSize": "1,000",
+      "drawCRS": "533"
+    },
+    {
+      "date": "2025-11-14",
+      "datetime": "2025-11-14T11:53:39",
+      "time": 11.883333333333333,
+      "hour": 11,
+      "minute": 53,
+      "drawNumber": "379",
+      "drawName": "Healthcare and social services occupations (Version 2)",
+      "drawSize": "3,500",
+      "drawCRS": "462"
     }
   ],
-  "analysis_date": "2025-11-10 23:11:38"
+  "analysis_date": "2025-11-15 13:06:12"
 }

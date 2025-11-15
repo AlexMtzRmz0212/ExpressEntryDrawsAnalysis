@@ -21,13 +21,13 @@
         </div>
 
         <div class="chart-container">
-            <h2>Draw Times Distribution (Bar Chart)</h2>
-            <canvas id="timeBarChart"></canvas>
+            <h2>Draw Times Over History (Line Chart)</h2>
+            <canvas id="timeLineChart"></canvas>
         </div>
 
         <div class="chart-container">
-            <h2>Draw Times Over History (Line Chart)</h2>
-            <canvas id="timeLineChart"></canvas>
+            <h2>Draw Times Distribution (Bar Chart)</h2>
+            <canvas id="timeBarChart"></canvas>
         </div>
 
         <div class="time-stats" id="timeStats">
@@ -203,14 +203,28 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value">${timeData.total_draws_with_times || 0}</div>
-                        <div class="stat-label">Draws with Time Data</div>
+                        <div class="stat-label">Draws</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">${formatHour(mostCommonHour)}</div>
-                        <div class="stat-label">Most Common Time</div>
+                        <div class="stat-value">${mostCommonHour}</div>
+                        <div class="stat-label">Most Common Time Range</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">${formatHour(Math.round(avgHour))}</div>
+                        <div class="stat-value">${
+                            (function(){
+                                if (avgHour === null || avgHour === undefined) return 'N/A';
+                                const hour = Math.floor(avgHour);
+                                // interpret fractional part as minutes (e.g. 13.45 -> 13:45)
+                                let minutes = Math.round((avgHour - hour) * 100);
+                                // fallback: if minutes >= 60 assume fractional was fraction of an hour and convert
+                                if (minutes >= 60) {
+                                    minutes = Math.round((avgHour - hour) * 60);
+                                }
+                                const period = hour < 12 ? 'AM' : 'PM';
+                                const displayHour = hour % 12 || 12;
+                                return `${displayHour}:${minutes.toString().padStart(2,'0')} ${period}`;
+                            })()
+                        }</div>
                         <div class="stat-label">Average Time</div>
                     </div>
                 </div>
