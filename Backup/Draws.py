@@ -21,7 +21,7 @@ class ExpressEntryManager:
     def __init__(self, data_dir: str = "."):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(exist_ok=True)
-        self.json_path = self.data_dir / "Data/EE.json"
+        self.json_path = self.data_dir / "../Data/EE.json"
         self.api_url = "https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json"
         
         # Define columns to keep (reduced for efficiency)
@@ -382,7 +382,7 @@ class ExpressEntryManager:
                         "coefficient_of_variation": cv_crs
                     }
                 }
-                with open(self.data_dir / "Data/analysis.json", "w") as f:
+                with open(self.data_dir / "../Data/analysis.json", "w") as f:
                     json.dump(analysis, f, indent=2)
             except Exception as e:
                 logger.error(f"Error during analysis saving: {e}")
@@ -393,7 +393,7 @@ class ExpressEntryManager:
             time_analysis = self.analyze_draw_times()
             
             # Save full draws data for web visualization
-            with open(self.data_dir / "Data/EE.json", "w") as f:
+            with open(self.data_dir / "../Data/EE.json", "w") as f:
                 json.dump(data, f, indent=2)
                 
             print(f"✅ Time analysis: {time_analysis.get('total_draws_with_times', 0)} draws with times")
@@ -540,7 +540,7 @@ class ExpressEntryManager:
             }
             
             # Save time analysis separately
-            with open(self.data_dir / "Data/time_analysis.json", "w") as f:
+            with open(self.data_dir / "../Data/time_analysis.json", "w") as f:
                 json.dump(time_analysis, f, indent=2)
             
             logger.info(f"Time analysis completed: {total_draws} draws with valid times")
