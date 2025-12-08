@@ -1,10 +1,10 @@
 from pathlib import Path
 
-
 class Config:
     API_URL = "https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json"
     REQUEST_TIMEOUT = 10  # seconds
 
+    # File paths
     DATA_PATH = Path("../Data")
     EE_PATH = DATA_PATH / "EE.json"
     ANALYSIS_PATH = DATA_PATH / "analysis.json"
@@ -16,5 +16,12 @@ class Config:
         "drawDistributionAsOn"
     ] + [f"dd{i}" for i in range(1, 19)]
 
+    EMAIL_SETTINGS = {
+        "SMTP_SERVER": "smtp.gmail.com",
+        "SMTP_PORT": 587,
+        "USERNAME": "your_username",
+        "PASSWORD": "your_password",
+        "FROM_ADDRESS": "your_email@example.com"
+    }
     def clear_screen(self):
         print("\033c", end="")
