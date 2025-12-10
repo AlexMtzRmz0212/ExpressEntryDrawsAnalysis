@@ -23,5 +23,3 @@ class Config:
         "PASSWORD": "your_password",
         "FROM_ADDRESS": "your_email@example.com"
     }
-    def clear_screen(self):
-        print("\033c", end="")

@@ -1,13 +1,63 @@
-from config import Config
-from fetcher import Fetcher
-from processor import Processor
-from analyzer import Analyzer
-from email_service import EmailService
+import os
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+from pathlib    import Path
+from typing     import Tuple
+from datetime   import datetime
+
+# module      /     Class
+from config     import Config
+from fetcher    import Fetcher
+from processor  import Processor
+from tracker    import Tracker
+from analyzer   import Analyzer
+from mailer     import EmailService
 
 class Manager:
-    def __init__(self):
-        self.config     = Config()
-        self.fetcher    = Fetcher()
-        self.processor  = Processor()
-        self.analyzer   = Analyzer()
-        self.email      = EmailService()
+    def __init__(self, data_dir: str = "."):
+        self.config             = Config()
+        self.config.DATA_PATH   = Path(data_dir)
+        self.config.DATA_PATH.mkdir(exist_ok=True)
+
+        # Initialize components
+        self.fetcher    = Fetcher(self.config)
+        self.processor  = Processor(self.config)
+        self.tracker    = Tracker(self.config)
+        self.analyzer   = Analyzer(self.config, self.processor)
+        self.mailer     = EmailService(self.config)
+
+    def clear_screen(self):
+        """Clear terminal output."""
+        os.system('cls' if os.name == 'nt' else 'clear')
+    
+    def update_data(self) -> Tuple[bool, int, int]:
+        """Update data. Returns (success, existing_count, new_count)."""
+        try:
+            # FETCHER
+            data = self.fetcher.fetch_json()
+            
+            # PROCESSOR
+            new_df = self.processor.process_data(data["rounds"])
+            new_count = len(new_df)
+                
+            # TRACKER
+            existing_df = self.tracker.get_existing_data()
+            existing_count = len(existing_df) if existing_df is not None else 0
+
+            # Add metadata
+            data["metadata"] = {
+                "updated_at": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+            }
+            # Save new data
+            with open(self.config.JSON_PATH, "w") as f:
+                json.dump(data, f, indent=2)
+
+            logger.info(f"Data updated: {existing_count} → {new_count} draws")
+            return True, existing_count, new_count
+        
+        except Exception as e:
+            logger.error(f"Data update failed: {e}")
+            return False, 0, 0
