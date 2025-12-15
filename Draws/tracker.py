@@ -13,8 +13,10 @@ class Tracker:
     def get_existing_data(self) -> Optional[pd.DataFrame]:
             """Get existing data if available."""
             try:
-                if self.config.JSON_PATH.exists():
-                    with open(self.config.JSON_PATH, "r") as f:
+                logger.info("Checking for existing data...")
+                if self.config.DRAWS_JSON.exists():
+                    logger.info(f"Loading existing data from {self.config.DRAWS_JSON}")
+                    with open(self.config.DRAWS_JSON, "r") as f:
                         data = json.load(f)
                     df = pd.DataFrame(data["rounds"])
                     columns = [
@@ -22,7 +24,8 @@ class Tracker:
                         if col in df.columns
                     ]
                     logger.info(f"Loaded {len(df)} existing draws.")
-                    return df[columns]
+                    return df#[columns] # Return only selected columns
+                logger.info("No existing data found.")  
                 return None
             except Exception as e:
                 logger.error(f"Error reading existing data: {e}")

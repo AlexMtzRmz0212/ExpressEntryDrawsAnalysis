@@ -14,7 +14,7 @@ class Processor:
     def __init__(self, config: Config):
         self.config = config
 
-    def process_draw_data(self, rounds: List[Dict]) -> pd.DataFrame:
+    def process_data(self, rounds: List[Dict]) -> pd.DataFrame:
         df = pd.DataFrame(rounds)
 
         selected_columns = [

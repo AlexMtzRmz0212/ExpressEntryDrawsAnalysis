@@ -6,7 +6,7 @@ class Config:
 
     # File paths
     DATA_PATH = Path("../Data")
-    EE_PATH = DATA_PATH / "EE.json"
+    DRAWS_JSON = DATA_PATH / "draws.json"
     ANALYSIS_PATH = DATA_PATH / "analysis.json"
     TIME_ANALYSIS_PATH = DATA_PATH / "time_analysis.json"
 
