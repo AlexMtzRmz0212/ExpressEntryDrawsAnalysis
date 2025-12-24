@@ -5,7 +5,7 @@
   <summary><code>manager.update_data()</code></summary>
 
   - <details open>
-    <summary><code>fetcher.fetch_json()</code></summary>
+    <summary><code>fetcher.fetch_json()</code> ---> <code>self.raw_dict</code></summary>
     
     - `response = requests.get()`
     - `response.raise_for_status()`
@@ -14,7 +14,7 @@
     </details>
   
   - <details open>
-    <summary><code>processor.process_data()</code></summary>
+    <summary><code>processor.process_data()</code> ---> <code>self.processesd_df</code></summary>
     
     - `return df[selected_columns].sort_values('drawDate', ascending=False).reset_index(drop=True)`
     

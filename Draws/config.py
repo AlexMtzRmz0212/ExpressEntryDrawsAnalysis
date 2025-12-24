@@ -5,10 +5,11 @@ class Config:
     REQUEST_TIMEOUT = 10  # seconds
 
     # File paths
-    DATA_PATH = Path("../Data")
+    DATA_PATH = Path("Data")
     DRAWS_JSON = DATA_PATH / "draws.json"
-    ANALYSIS_PATH = DATA_PATH / "analysis.json"
-    TIME_ANALYSIS_PATH = DATA_PATH / "time_analysis.json"
+    PROCESSED = DATA_PATH / "processed.csv"
+    ANALYSIS_JSON = DATA_PATH / "analysis.json"
+    TIME_ANALYSIS_JSON = DATA_PATH / "time_analysis.json"
 
     SELECTED_COLUMNS = [
         "drawNumber", "drawDate", "drawDateTime", "drawName",

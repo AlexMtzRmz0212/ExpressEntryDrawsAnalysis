@@ -14,18 +14,17 @@ class Tracker:
             """Get existing data if available."""
             try:
                 logger.info("Checking for existing data...")
-                if self.config.DRAWS_JSON.exists():
-                    logger.info(f"Loading existing data from {self.config.DRAWS_JSON}")
+                if self.config.DRAWS_JSON.exists() and self.config.PROCESSED.exists():
+                    
                     with open(self.config.DRAWS_JSON, "r") as f:
                         data = json.load(f)
-                    df = pd.DataFrame(data["rounds"])
-                    columns = [
-                        col for col in self.config.SELECTED_COLUMNS
-                        if col in df.columns
-                    ]
-                    logger.info(f"Loaded {len(df)} existing draws.")
-                    return df#[columns] # Return only selected columns
-                logger.info("No existing data found.")  
+                    logger.info(f"Found {len(data.get('rounds', []))} draws from {self.config.DRAWS_JSON}")
+
+                    processed_data = pd.read_csv(self.config.PROCESSED)
+                    logger.info(f"Found {len(processed_data)} draws from {self.config.PROCESSED}")
+
+                    return processed_data
+                logger.info("No existing data or incomplete.")  
                 return None
             except Exception as e:
                 logger.error(f"Error reading existing data: {e}")
