@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 def main():
     manager = Manager()
     manager.clear_screen()
+    manager.JUST_UPDATE()
     
-
-
 if __name__ == "__main__":
-
     main()

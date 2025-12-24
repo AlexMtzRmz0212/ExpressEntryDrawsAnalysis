@@ -157,12 +157,9 @@ class Manager:
             logger.info(f"Data updated successfully: {existing_count} → {new_count} draws")
         else:
             logger.info("Data was not updated.")
-        return None
 
-# TO DO: Implement analyze method   
     def analyze(self):
 
-        # ALL CALCULATIONS AND ANALYSIS GO HERE
         return None
 
     
