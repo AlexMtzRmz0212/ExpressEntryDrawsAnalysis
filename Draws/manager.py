@@ -149,11 +149,23 @@ class Manager:
             logger.error(f"Data update failed: {e}")
             return False, 0, 0
         
-    # TO DO
-    def UPDATE_AND_ANALYZE():
+
+    def JUST_UPDATE(self):
+        logger.info("Starting data update process...")
+        updated, existing_count, new_count = self.update_data()
+        if updated:
+            logger.info(f"Data updated successfully: {existing_count} → {new_count} draws")
+        else:
+            logger.info("Data was not updated.")
         return None
+
+# TO DO: Implement analyze method   
+    def analyze(self):
+
+        # ALL CALCULATIONS AND ANALYSIS GO HERE
+        return None
+
     
-    # TO DO > make able to select which analysis to run
-    # by selecting through analyzer methods
-    def analyze():
-        return None
+    def UPDATE_AND_ANALYZE(self):
+        self.JUST_UPDATE()
+        self.analyze()
