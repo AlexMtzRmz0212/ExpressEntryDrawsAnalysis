@@ -23,6 +23,20 @@ class Analyzer:
         self.config = config
         self.processor = processor
 
+    def get_draw_times(self):
+        """Extract draw times for web visualization."""
+        try:
+            # Load Processed Data
+            
+
+
+
+
+
+
+
+
+
     def analyze(self, data: Dict[str, Any]) -> Optional[AnalysisResult]:
         try:
             df = pd.DataFrame(data["rounds"])

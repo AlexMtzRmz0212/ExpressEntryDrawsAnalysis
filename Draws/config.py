@@ -1,7 +1,7 @@
 from pathlib import Path
 
 class Config:
-    API_URL = "https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json"
+    URL = "https://www.canada.ca/content/dam/ircc/documents/json/ee_rounds_123_en.json"
     REQUEST_TIMEOUT = 10  # seconds
 
     # File paths

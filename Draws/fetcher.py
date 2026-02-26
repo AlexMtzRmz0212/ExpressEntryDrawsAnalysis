@@ -13,7 +13,7 @@ class Fetcher:
     def fetch_json(self) -> Dict[str, Any]:
         try: 
             response = requests.get(
-                self.config.API_URL, 
+                self.config.URL, 
                 timeout=self.config.REQUEST_TIMEOUT
             )
             response.raise_for_status()

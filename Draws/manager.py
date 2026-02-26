@@ -1,12 +1,13 @@
 import os
 import json
+import pickle
 import logging
 import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 from pathlib    import Path
-from typing     import Tuple, Union, Dict, Any
+from typing     import Tuple, Union, Any
 from datetime   import datetime
 
 # module      /     Class
@@ -128,7 +129,6 @@ class Manager:
 
             # Save new data
             if existing_df is None:
-
                 logger.info("Writing new data to files.")
                 self.save_file(data, self.config.DRAWS_JSON, format='json')
                 self.save_file(new_df, self.config.PROCESSED, format='csv')
@@ -149,6 +149,8 @@ class Manager:
             logger.error(f"Data update failed: {e}")
             return False, 0, 0
         
+    def analyze(self):
+        draw_times = self.analyzer.get_draw_times()
 
     def JUST_UPDATE(self):
         logger.info("Starting data update process...")
@@ -158,11 +160,8 @@ class Manager:
         else:
             logger.info("Data was not updated.")
 
-    def analyze(self):
-
-        return None
-
-    
     def UPDATE_AND_ANALYZE(self):
         self.JUST_UPDATE()
         self.analyze()
+
+        
