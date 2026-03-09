@@ -23,17 +23,21 @@
       
       </details>
 
+    <!-- - <details open> -->
+      - <summary><mark><code>self.processed_df = new_df</code></mark># This means that the actual pd df is accesible by attribute</summary>
+      <!-- </details> -->
+
     - <details open>
       <summary><code>tracker.get_existing_data()</code></summary>
       
-      - `if DRAWS_JSON.exists()`
+      - `if DRAWS.with_extension('.json').exists()`
         - `data = json.load()`
       
       </details>
 
-    - <details open>
-      <summary><mark>Add Metadata</mark></summary>
-      </details>
+    <!-- - <details open> -->
+      - <summary><mark>Add Metadata to JSON</mark></summary>
+      <!-- </details> -->
 
     - <details open> 
       <summary>if not existing | existing less than new</summary>

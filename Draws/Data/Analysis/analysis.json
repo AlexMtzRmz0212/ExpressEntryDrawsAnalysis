@@ -1,0 +1,32 @@
+{
+  "latest_draw": {
+    "crs": 429,
+    "number": "402",
+    "date": "2026-03-05T00:00:00",
+    "size": 250.0,
+    "name": "Senior managers with Canadian Work Experience, 2026-Version 1"
+  },
+  "total_draws": 403,
+  "updated": {
+    "last": "2026-03-09 01:25:31 Eastern Daylight Time"
+  },
+  "draws": {
+    "total": 403
+  },
+  "draw date": {
+    "earliest": "2015-01-31",
+    "latest": "2026-03-05"
+  },
+  "size": {
+    "highest": 975,
+    "average": 558.17,
+    "lowest": 118,
+    "coefficient_of_variation": 39.52
+  },
+  "score": {
+    "highest": 902,
+    "average": 534.03,
+    "lowest": 75,
+    "coefficient_of_variation": 25.63
+  }
+}

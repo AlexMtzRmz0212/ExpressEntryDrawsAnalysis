@@ -6,14 +6,21 @@ class Config:
 
     # File paths
     DATA_PATH = Path("Data")
-    DRAWS_JSON = DATA_PATH / "draws.json"
-    PROCESSED = DATA_PATH / "processed.csv"
-    ANALYSIS_JSON = DATA_PATH / "analysis.json"
-    TIME_ANALYSIS_JSON = DATA_PATH / "time_analysis.json"
+    DRAWS = DATA_PATH / "draws"
+
+    ANALYSIS_PATH = DATA_PATH / "Analysis"
+    ANALYSIS_JSON = ANALYSIS_PATH / "analysis.json"
+    TIME_ANALYSIS_JSON = ANALYSIS_PATH / "time_analysis.json"
 
     SELECTED_COLUMNS = [
-        "drawNumber", "drawDate", "drawDateTime", "drawName",
-        "drawSize", "drawCRS", "drawText2", "drawCutOff",
+        "drawNumber", 
+        "drawDate", 
+        "drawDateTime", 
+        "drawName",
+        "drawSize", 
+        "drawCRS", 
+        "drawText2", 
+        "drawCutOff",
         "drawDistributionAsOn"
     ] + [f"dd{i}" for i in range(1, 19)]
 

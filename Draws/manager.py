@@ -106,6 +106,13 @@ class Manager:
             logger.error(f"Failed to save {filepath}: {e}")
             raise
 
+    def save_to_all(self, data: dict, df: pd.DataFrame):
+        """Save data to all formats."""
+        self.save_file(data, self.config.DRAWS.with_suffix('.json'), format='json')
+        self.save_file(df, self.config.DRAWS.with_suffix('.csv'), format='csv')
+        # self.save_file(df, self.config.DRAWS.with_suffix('.parquet'), format='parquet')
+        # self.save_file(df, self.config.DRAWS.with_suffix('.pkl'), format='pickle')
+
     def update_data(self) -> Tuple[bool, int, int]:
         """Update data. Returns (success, existing_count, new_count)."""
         try:
@@ -115,7 +122,6 @@ class Manager:
             
             # PROCESSOR
             new_df = self.processor.process_data(data["rounds"])
-            self.processed_df = new_df
             new_count = len(new_df)
                 
             # TRACKER
@@ -124,21 +130,21 @@ class Manager:
 
             # Add metadata
             timestamp = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
-            new_df["metadata"] = {"updated_at": timestamp}
             data["metadata"] = {"updated_at": timestamp}
-
+            
             # Save new data
+
+            self.processed_df = new_df
+            
             if existing_df is None:
-                logger.info("Writing new data to files.")
-                self.save_file(data, self.config.DRAWS_JSON, format='json')
-                self.save_file(new_df, self.config.PROCESSED, format='csv')
+                logger.info("No old data found. Writing new data to files.")
+                self.save_to_all(data, new_df)
                 return True, existing_count, new_count
             
             elif existing_count < new_count:
 
                 logger.info(f"New draws found. Updating data ({existing_count} -> {new_count}).")
-                self.save_file(data, self.config.DRAWS_JSON, format='json')
-                self.save_file(new_df, self.config.PROCESSED, format='csv')
+                self.save_to_all(data, new_df)  
                 return True, existing_count, new_count
             
             else:
@@ -150,7 +156,26 @@ class Manager:
             return False, 0, 0
         
     def analyze(self):
-        draw_times = self.analyzer.get_draw_times()
+        """Run analysis on current data."""
+        if self.processed_df is None:
+            logger.error("No data to analyze. Run update_data first.")
+            return
+        
+        try:
+            # Get raw data for metadata
+            with open(self.config.DRAWS.with_suffix('.json'), 'r') as f:
+                raw_data = json.load(f)
+                logger.info(f"Loaded raw data for analysis: {len(raw_data.get('rounds', []))} rounds")
+            
+            # Run analyses
+            draw_times = self.analyzer.get_draw_times(self.processed_df)
+            time_analysis = self.analyzer.analyze_draw_times(self.processed_df)
+            summary_analysis = self.analyzer.analyze_draws(self.processed_df, raw_data)
+            
+            logger.info(f"Analysis complete: {len(draw_times)} draws processed")
+            
+        except Exception as e:
+            logger.error(f"Analysis failed: {e}")
 
     def JUST_UPDATE(self):
         logger.info("Starting data update process...")

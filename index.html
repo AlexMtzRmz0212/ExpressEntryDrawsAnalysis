@@ -240,7 +240,7 @@
 
     <script>
         // Load main analysis data
-        fetch('Data/analysis.json')
+        fetch('Draws/Data/Analysis/analysis.json')
             .then(response => response.json())
             .then(analysisData => {
                 // Update the dashboard with real data
@@ -253,7 +253,7 @@
             });
 
         // Load time analysis data for timing metrics
-        fetch('Data/time_analysis.json')
+        fetch('Draws/Data/Analysis/time_analysis.json')
             .then(response => response.json())
             .then(timeData => {
                 updateTimeMetrics(timeData);
