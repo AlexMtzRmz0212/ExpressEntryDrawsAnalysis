@@ -1,74 +1,178 @@
-# Canadian Immigration Draw Analysis  
-📊 Analysis of Express Entry draw trends (CRS scores, draw sizes, and distributions).  
+# Express Entry Draws Intelligence Dashboard
 
-## Tools Used  
-- Python (Pandas, Matplotlib, Seaborn)  
-- Power BI
-- Tableau
-- Jupyter Notebook
+A fully automated, full-stack web application that visualises historical [Express Entry](https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html) draw data from IRCC Canada.
 
-## Key Insights Examples
-1. CRS scores were lowest in Q1 2023 due to increased draw sizes.  
-2. PNP-specific draws had higher cutoffs than general draws.  
+---
 
-## How to Run
+## Architecture
 
-Follow these steps to get the project up and running on your local machine.
-
-### 1. Get the Code & Dependencies
-
-First, clone the repository and install the required Python packages.
-
-```bash
-# Clone the repository
-git clone https://github.com/AlexMtzRmz0212/ExpressEntryDrawsAnalysis.git
-
-cd ExpressEntryDrawsAnalysis
-
-# Install dependencies (pandas, requests, etc.)
-pip install -r requirements.txt
+```
+┌─────────────────────────────────────────────────────────┐
+│  GitHub Actions (cron: daily)                           │
+│    └── scripts/update_draws.py                          │
+│          ├── Fetches IRCC JSON                          │
+│          ├── Detects new rounds (by roundNumber)        │
+│          ├── Writes public/data/analyses/*.json         │
+│          └── Commits only when new data found           │
+└─────────────────────┬───────────────────────────────────┘
+                      │ static JSON files
+┌─────────────────────▼───────────────────────────────────┐
+│  React + Tailwind (GitHub Pages)                        │
+│    AnalysisDataContext                                   │
+│      └── fetches module_manifest.json on boot           │
+│    DashboardGrid                                         │
+│      └── maps manifest → AnalysisContainer × N          │
+│    AnalysisContainer (per module)                       │
+│      ├── Fetches its own data endpoint                  │
+│      ├── Reserved visualization canvas                  │
+│      └── Raw data table (proves data loaded)            │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### 2. Initialize the Data
+**Key design principle:** The Python ETL script drives the UI. Add a new analysis output file, register it in `build_manifest()`, and the dashboard automatically gains a new panel — no frontend changes needed.
 
-This project requires data from the IRCC (Immigration, Refugees and Citizenship Canada) API. The first time you run it, you need to fetch all the historical data.
+---
 
--   **Run the data updater:**
-    ```bash
-    python update_draws.py
-    ```
-    This script will:
-    - Create a `./Data/` directory.
-    - Download the complete draw history as a JSON file.
-    - Process and save the data into a clean CSV file (`ExpressEntry.csv`).
+## Quick Start
 
-### 3. Check the Latest Draw
+### 1 — Fork & clone
 
-The main application displays information about the most recent draw and can check for updates.
+```bash
+git clone https://github.com/YOUR_USERNAME/express-entry-dashboard.git
+cd express-entry-dashboard
+```
 
--   **Run the main program:**
-    ```bash
-    python last_draw.py
-    ```
-    When you run this, it will:
-    1.  Check your local `ExpressEntry.csv` file.
-    2.  Contact the IRCC API to see if any new draws have occurred.
-    3.  **Prompt you** to update your local data if new draws are found.
-    4.  Display a formatted summary of the latest draw, including the date, draw number, CRS score, and days since the last draw.
+### 2 — Configure GitHub Pages
 
-### Ongoing Usage
+In your repo → **Settings → Pages**, set the source to **GitHub Actions**.
 
-After the initial setup, you can simply run `python last_draw.py` whenever you want to check for new draws. It will handle the update process for you.
+### 3 — Set your homepage URL
 
-### Glosary
-dd1: Number of Federal Skilled Worker Program invitations
+Edit `package.json`:
+```json
+"homepage": "https://YOUR_USERNAME.github.io/express-entry-dashboard"
+```
 
-dd2: Number of Canadian Experience Class invitations
+### 4 — Enable the Actions
 
-dd3: Number of Federal Skilled Trades Program invitations
+Both workflows are in `.github/workflows/`:
+- `update_draws.yml` — runs daily at 05:00 UTC and on manual trigger
+- `deploy.yml` — builds and deploys the React app on every push to `main`
 
-dd4 to dd9: Sub-categories by provinces or regions for invitations (e.g., Ontario, Quebec, BC, Alberta, etc.)
+Trigger the first ETL run manually:
+**Actions → Daily Data Sync → Run workflow**
 
-dd10 to dd15: Distribution by language proficiency or age groups
+### 5 — Local development
 
-dd16 to dd18: Other stats like total candidates in pool, total applicants invited historically, or pending applications
+```bash
+npm install
+npm start
+```
+
+The app will load the bootstrapped `public/data/analyses/` files.
+To test with live data locally, run the ETL script first:
+
+```bash
+pip install requests structlog
+python scripts/update_draws.py
+```
+
+---
+
+## Project Structure
+
+```
+express-entry-dashboard/
+├── .github/workflows/
+│   ├── update_draws.yml       # Daily ETL + git commit
+│   └── deploy.yml             # React build + GitHub Pages deploy
+│
+├── scripts/
+│   └── update_draws.py        # ETL: fetch → parse → write JSON
+│
+├── data/
+│   └── analysis_raw.json      # Full IRCC response (audit log, not served)
+│
+├── public/
+│   ├── index.html
+│   └── data/analyses/
+│       ├── module_manifest.json   # Label → path map (drives the UI)
+│       └── draw_summary.json      # Flattened draw records
+│
+└── src/
+    ├── App.js
+    ├── index.js
+    ├── index.css
+    ├── context/
+    │   └── AnalysisDataContext.js  # Loads manifest; shared via Context
+    └── components/
+        ├── Header.js               # Title, status, last-updated
+        ├── DashboardGrid.js        # Maps manifest → AnalysisContainer grid
+        └── AnalysisContainer.js    # Canvas + data table (one per module)
+```
+
+---
+
+## Adding a New Analysis Module
+
+1. **Write a Python analysis script** that produces a new JSON file:
+   ```python
+   # scripts/analyse_categories.py
+   import json
+   output = [{"category": "...", "count": 42}]
+   with open("public/data/analyses/category_breakdown.json", "w") as f:
+       json.dump(output, f)
+   ```
+
+2. **Register it in the manifest** inside `scripts/update_draws.py`:
+   ```python
+   def build_manifest() -> dict:
+       return {
+           "Historical Cutoff Trends":  "/data/analyses/draw_summary.json",
+           "Category Breakdown":        "/data/analyses/category_breakdown.json",  # ← new
+       }
+   ```
+
+3. **Call your script** from the GitHub Action:
+   ```yaml
+   - name: Run ETL scripts
+     run: |
+       python scripts/update_draws.py
+       python scripts/analyse_categories.py
+   ```
+
+4. **Push.** The React dashboard will automatically render a new panel for it.
+
+To add a real visualisation to an existing panel, replace the canvas `<div>` inside `AnalysisContainer.js` with a Recharts, Chart.js, or D3 component — the data is already fetched and available as the `data` state variable.
+
+---
+
+## Data Schema
+
+### `draw_summary.json`
+
+Array of draw objects:
+
+| Field                | Type     | Description                        |
+|----------------------|----------|------------------------------------|
+| `roundNumber`        | `number` | Sequential draw number             |
+| `roundDate`          | `string` | ISO datetime of the draw           |
+| `roundType`          | `string` | Draw category (e.g. "No Program Specified") |
+| `invitationsIssued`  | `number` | Number of ITAs issued              |
+| `lowestScoreCutoff`  | `number` | Minimum CRS score accepted         |
+
+### `module_manifest.json`
+
+Plain object mapping UI label strings to data endpoint paths:
+
+```json
+{
+  "Historical Cutoff Trends": "/data/analyses/draw_summary.json"
+}
+```
+
+---
+
+## License
+
+MIT
