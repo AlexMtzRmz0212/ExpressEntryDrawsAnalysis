@@ -59,7 +59,9 @@ def load_existing_summary() -> list[dict]:
         return []
     with DRAW_SUMMARY_PATH.open("r", encoding="utf-8") as f:
         data = json.load(f)
-    log.info("loaded_existing_summary", count=len(data))
+    latest_round = max((d.get("roundNumber", 0) for d in data), default=0)
+    log.info("loaded_existing_summary", count=len(data), latest_roundNumber=latest_round)
+
     return data
 
 
@@ -92,27 +94,32 @@ def parse_draw(draw: dict) -> dict:
     the most common field name variants.
     """
     round_number = int(
-        draw.get("roundNumber")
-        or draw.get("drawNumber")
-        or 0
-    )
+        ''.join(
+            filter(
+                str.isdigit, 
+                str(draw.get("roundNumber") 
+                    or draw.get("drawNumber") 
+                    or 0))) 
+                    or 0)
+    
     round_date = (
         draw.get("drawDateTime")
         or draw.get("drawDate")
         or draw.get("date")
         or ""
     )
+    
     # drawName can be a dict {"en": "...", "fr": "..."} or a plain string
     draw_name = draw.get("drawName") or draw.get("drawNameEN") or ""
     if isinstance(draw_name, dict):
         draw_name = draw_name.get("en", "")
 
     return {
-        "roundNumber":        round_number,
-        "roundDate":          round_date,
-        "roundType":          draw_name,
-        "invitationsIssued":  int(draw.get("drawSize") or draw.get("invitations") or 0),
-        "lowestScoreCutoff":  int(draw.get("drawCRS")  or draw.get("cutoffScore") or 0),
+        "roundNumber":          round_number,
+        "roundDate":            round_date,
+        "roundType":            draw_name,
+        "invitationsIssued":    int(str(draw.get("drawSize") or draw.get("invitations") or 0).replace(',', '')),
+        "lowestScoreCutoff":    int(draw.get("drawCRS")  or draw.get("cutoffScore") or 0),
     }
 
 
@@ -136,6 +143,7 @@ def find_new_draws(raw: dict, existing: list[dict]) -> list[dict]:
             parsed = parse_draw(draw)
         except Exception as exc:
             log.warning("parse_error", draw=draw, error=str(exc))
+            print()
             continue
         if parsed["roundNumber"] > highest_known:
             new_draws.append(parsed)
@@ -202,4 +210,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    import os
+    os.system("cls" if os.name == "nt" else "clear")
     main()
