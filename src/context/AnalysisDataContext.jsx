@@ -15,9 +15,10 @@ export function AnalysisDataProvider({ children }) {
   const [error, setError]             = useState(null);
   const [lastModified, setLastModified] = useState(null);
 
+  const resolvePublicUrl = (path) => new URL(path.replace(/^\//, ""), window.location.origin + import.meta.env.BASE_URL).href;
+
   useEffect(() => {
-    // PUBLIC_URL is injected by CRA; on GitHub Pages it becomes "/repo-name"
-    const url = `${process.env.PUBLIC_URL}/data/analyses/module_manifest.json`;
+    const url = resolvePublicUrl("data/analyses/module_manifest.json");
 
     fetch(url)
       .then((res) => {

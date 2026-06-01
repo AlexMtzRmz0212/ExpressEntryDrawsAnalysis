@@ -137,8 +137,10 @@ export default function AnalysisContainer({ title, dataPath }) {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
 
+  const resolvePublicUrl = (path) => new URL(path.replace(/^\//, ""), window.location.origin + import.meta.env.BASE_URL).href;
+
   useEffect(() => {
-    const url = `${process.env.PUBLIC_URL}${dataPath}`;
+    const url = resolvePublicUrl(dataPath);
     fetch(url)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

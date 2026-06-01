@@ -33,7 +33,7 @@ jobs:
         run: npm run build
         env:
           # Injects the repo name as the sub-path for GitHub Pages
-          PUBLIC_URL: '/${{ github.event.repository.name }}'
+          VITE_BASE_PATH: '/${{ github.event.repository.name }}/'
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,1 +1,954 @@
-[]
+[
+  {
+    "roundNumber": 1,
+    "roundDate": "January 31, 2015 at 11:59:48 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 779,
+    "lowestScoreCutoff": 886
+  },
+  {
+    "roundNumber": 2,
+    "roundDate": "February 7, 2015 at 11:59:59 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 779,
+    "lowestScoreCutoff": 818
+  },
+  {
+    "roundNumber": 3,
+    "roundDate": "February 20, 2015 at 11:59:47 UTC",
+    "roundType": "Canadian Experience Class",
+    "invitationsIssued": 849,
+    "lowestScoreCutoff": 808
+  },
+  {
+    "roundNumber": 7,
+    "roundDate": "April 11, 2015 at 00:00:01 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 925,
+    "lowestScoreCutoff": 469
+  },
+  {
+    "roundNumber": 8,
+    "roundDate": "April 18, 2015 at 00:00:00 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 715,
+    "lowestScoreCutoff": 453
+  },
+  {
+    "roundNumber": 31,
+    "roundDate": "April 6, 2016 at 12:32:17 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 954,
+    "lowestScoreCutoff": 470
+  },
+  {
+    "roundNumber": 33,
+    "roundDate": "May 6, 2016 at 12:47:39 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 799,
+    "lowestScoreCutoff": 534
+  },
+  {
+    "roundNumber": 34,
+    "roundDate": "May 18, 2016 at 13:45:56 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 763,
+    "lowestScoreCutoff": 484
+  },
+  {
+    "roundNumber": 35,
+    "roundDate": "June 1, 2016 at 18:59:32 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 762,
+    "lowestScoreCutoff": 483
+  },
+  {
+    "roundNumber": 36,
+    "roundDate": "June 15, 2016 at 13:35:01 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 752,
+    "lowestScoreCutoff": 488
+  },
+  {
+    "roundNumber": 37,
+    "roundDate": "June 29, 2016 at 12:10:42 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 773,
+    "lowestScoreCutoff": 482
+  },
+  {
+    "roundNumber": 38,
+    "roundDate": " July 13, 2016 at 13:56:45 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 747,
+    "lowestScoreCutoff": 482
+  },
+  {
+    "roundNumber": 39,
+    "roundDate": "July 27, 2016 at 12:40:23 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 755,
+    "lowestScoreCutoff": 488
+  },
+  {
+    "roundNumber": 40,
+    "roundDate": "August 10, 2016 at 11:17:01 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 754,
+    "lowestScoreCutoff": 490
+  },
+  {
+    "roundNumber": 41,
+    "roundDate": "August 24, 2016 at 12:12:22 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 750,
+    "lowestScoreCutoff": 538
+  },
+  {
+    "roundNumber": 48,
+    "roundDate": "November 30, 2016 at 14:58:44 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 559,
+    "lowestScoreCutoff": 786
+  },
+  {
+    "roundNumber": 63,
+    "roundDate": "May 26, 2017, at 16:35:48 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 143,
+    "lowestScoreCutoff": 775
+  },
+  {
+    "roundNumber": 64,
+    "roundDate": "May 26, 2017, at 16:35:48 UTC",
+    "roundType": "Federal Skilled Trades",
+    "invitationsIssued": 400,
+    "lowestScoreCutoff": 199
+  },
+  {
+    "roundNumber": 75,
+    "roundDate": "November 1, 2017, at 12:55:44 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 290,
+    "lowestScoreCutoff": 673
+  },
+  {
+    "roundNumber": 76,
+    "roundDate": "November 1, 2017, at 12:55:44 UTC",
+    "roundType": "Federal Skilled Trades",
+    "invitationsIssued": 505,
+    "lowestScoreCutoff": 241
+  },
+  {
+    "roundNumber": 100,
+    "roundDate": "September 24, 2018 at 05:34:21 UTC",
+    "roundType": "Federal Skilled Trades",
+    "invitationsIssued": 400,
+    "lowestScoreCutoff": 284
+  },
+  {
+    "roundNumber": 117,
+    "roundDate": "May 15, 2019 at 11:23:38 UTC",
+    "roundType": "Federal Skilled Trades",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 332
+  },
+  {
+    "roundNumber": 128,
+    "roundDate": "October 16, 2019 at 12:56:58 UTC",
+    "roundType": "Federal Skilled Trades",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 357
+  },
+  {
+    "roundNumber": 139,
+    "roundDate": "March 19, 2020 at 02:04:06 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 668,
+    "lowestScoreCutoff": 720
+  },
+  {
+    "roundNumber": 141,
+    "roundDate": "April 9, 2020 at 14:14:53 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 606,
+    "lowestScoreCutoff": 698
+  },
+  {
+    "roundNumber": 143,
+    "roundDate": "April 15, 2020 at 14:31:00 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 118,
+    "lowestScoreCutoff": 808
+  },
+  {
+    "roundNumber": 145,
+    "roundDate": "April 29, 2020 at 11:17:20 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 589,
+    "lowestScoreCutoff": 692
+  },
+  {
+    "roundNumber": 147,
+    "roundDate": "May 13, 2020 at 13:11:44 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 529,
+    "lowestScoreCutoff": 718
+  },
+  {
+    "roundNumber": 149,
+    "roundDate": "May 27, 2020 at 11:37:30 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 385,
+    "lowestScoreCutoff": 757
+  },
+  {
+    "roundNumber": 151,
+    "roundDate": "June 10, 2020 at 13:49:43 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 341,
+    "lowestScoreCutoff": 743
+  },
+  {
+    "roundNumber": 153,
+    "roundDate": "June 24, 2020 at 11:24:10 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 392,
+    "lowestScoreCutoff": 696
+  },
+  {
+    "roundNumber": 156,
+    "roundDate": "July 22, 2020 at 12:15:22 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 557,
+    "lowestScoreCutoff": 687
+  },
+  {
+    "roundNumber": 159,
+    "roundDate": "August 6, 2020 at 13:46:53 UTC",
+    "roundType": "Federal Skilled Trades",
+    "invitationsIssued": 250,
+    "lowestScoreCutoff": 415
+  },
+  {
+    "roundNumber": 160,
+    "roundDate": "August 19, 2020 at 12:41:09 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 600,
+    "lowestScoreCutoff": 771
+  },
+  {
+    "roundNumber": 171,
+    "roundDate": "January 6, 2021 at 14:39:02 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 250,
+    "lowestScoreCutoff": 813
+  },
+  {
+    "roundNumber": 173,
+    "roundDate": "January 20, 2021 at 14:13:12 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 374,
+    "lowestScoreCutoff": 741
+  },
+  {
+    "roundNumber": 175,
+    "roundDate": "February 10, 2021 at 14:31:18 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 654,
+    "lowestScoreCutoff": 720
+  },
+  {
+    "roundNumber": 177,
+    "roundDate": "March 08, 2021 at 13:53:21 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 671,
+    "lowestScoreCutoff": 739
+  },
+  {
+    "roundNumber": 178,
+    "roundDate": "March 17, 2021 at 11:49:48 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 183,
+    "lowestScoreCutoff": 682
+  },
+  {
+    "roundNumber": 180,
+    "roundDate": "March 31, 2021 at 11:21:22 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 284,
+    "lowestScoreCutoff": 778
+  },
+  {
+    "roundNumber": 182,
+    "roundDate": "April 14, 2021 at 11:01:51 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 266,
+    "lowestScoreCutoff": 753
+  },
+  {
+    "roundNumber": 184,
+    "roundDate": "April 28, 2021 at 11:00:02 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 381,
+    "lowestScoreCutoff": 717
+  },
+  {
+    "roundNumber": 186,
+    "roundDate": "May 12, 2021 at 10:28:53 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 557,
+    "lowestScoreCutoff": 752
+  },
+  {
+    "roundNumber": 189,
+    "roundDate": "May 26, 2021 at 10:41:44 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 713
+  },
+  {
+    "roundNumber": 191,
+    "roundDate": "June 09, 2021 at 13:16:30 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 940,
+    "lowestScoreCutoff": 711
+  },
+  {
+    "roundNumber": 195,
+    "roundDate": "July 7, 2021 at 13:17:37 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 627,
+    "lowestScoreCutoff": 760
+  },
+  {
+    "roundNumber": 197,
+    "roundDate": "July 21, 2021 at 13:01:45 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 462,
+    "lowestScoreCutoff": 734
+  },
+  {
+    "roundNumber": 199,
+    "roundDate": "August 4, 2021 at 13:33:36 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 512,
+    "lowestScoreCutoff": 760
+  },
+  {
+    "roundNumber": 201,
+    "roundDate": "August 18, 2021 at 14:10:39 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 463,
+    "lowestScoreCutoff": 751
+  },
+  {
+    "roundNumber": 203,
+    "roundDate": "September 01, 2021 at 13:34:47 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 635,
+    "lowestScoreCutoff": 764
+  },
+  {
+    "roundNumber": 205,
+    "roundDate": "September 15, 2021 at 14:59:17 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 521,
+    "lowestScoreCutoff": 732
+  },
+  {
+    "roundNumber": 206,
+    "roundDate": "September 29, 2021 at 13:17:49 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 761,
+    "lowestScoreCutoff": 742
+  },
+  {
+    "roundNumber": 207,
+    "roundDate": "October 13, 2021 at 13:13:38 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 681,
+    "lowestScoreCutoff": 720
+  },
+  {
+    "roundNumber": 208,
+    "roundDate": "October 27, 2021 at 13:32:26 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 681,
+    "lowestScoreCutoff": 744
+  },
+  {
+    "roundNumber": 209,
+    "roundDate": "November 10, 2021 at 17:02:21 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 775,
+    "lowestScoreCutoff": 685
+  },
+  {
+    "roundNumber": 210,
+    "roundDate": "November 24, 2021 at 14:01:44 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 613,
+    "lowestScoreCutoff": 737
+  },
+  {
+    "roundNumber": 212,
+    "roundDate": "December 22, 2021 at 16:27:24 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 746,
+    "lowestScoreCutoff": 720
+  },
+  {
+    "roundNumber": 213,
+    "roundDate": "January 05, 2022 at 15:50:48 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 392,
+    "lowestScoreCutoff": 808
+  },
+  {
+    "roundNumber": 218,
+    "roundDate": "March 16, 2022 at 14:59:09 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 924,
+    "lowestScoreCutoff": 754
+  },
+  {
+    "roundNumber": 219,
+    "roundDate": "March 30, 2022 at 15:41:09 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 919,
+    "lowestScoreCutoff": 785
+  },
+  {
+    "roundNumber": 220,
+    "roundDate": "April 13, 2022 at 14:13:01 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 787,
+    "lowestScoreCutoff": 782
+  },
+  {
+    "roundNumber": 221,
+    "roundDate": "April 27, 2022 16:04:21 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 829,
+    "lowestScoreCutoff": 772
+  },
+  {
+    "roundNumber": 222,
+    "roundDate": "May 11, 2022 at 14:08:07 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 545,
+    "lowestScoreCutoff": 753
+  },
+  {
+    "roundNumber": 223,
+    "roundDate": "May 25, 2022 at 13:21:23 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 590,
+    "lowestScoreCutoff": 741
+  },
+  {
+    "roundNumber": 224,
+    "roundDate": "June 08, 2022 at 14:03:28 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 932,
+    "lowestScoreCutoff": 796
+  },
+  {
+    "roundNumber": 225,
+    "roundDate": "June 22, 2022 at 14:13:57 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 636,
+    "lowestScoreCutoff": 752
+  },
+  {
+    "roundNumber": 239,
+    "roundDate": "February 01, 2023, at 16:05:57 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 893,
+    "lowestScoreCutoff": 733
+  },
+  {
+    "roundNumber": 241,
+    "roundDate": "February 15, 2023, at 16:13:27 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 699,
+    "lowestScoreCutoff": 791
+  },
+  {
+    "roundNumber": 242,
+    "roundDate": "March 01, 2023, at 17:24:39 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 667,
+    "lowestScoreCutoff": 748
+  },
+  {
+    "roundNumber": 248,
+    "roundDate": "May 10, 2023 at 14:06:47 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 589,
+    "lowestScoreCutoff": 691
+  },
+  {
+    "roundNumber": 252,
+    "roundDate": "June 28, 2023 14:04:34 UTC",
+    "roundType": "Healthcare occupations (Version 1)",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 476
+  },
+  {
+    "roundNumber": 253,
+    "roundDate": "July 04, 2023 14:23:38 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 700,
+    "lowestScoreCutoff": 511
+  },
+  {
+    "roundNumber": 254,
+    "roundDate": "July 05, 2023 13:38:22 UTC",
+    "roundType": "STEM occupations (Version 1)",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 486
+  },
+  {
+    "roundNumber": 257,
+    "roundDate": "July 11, 2023 at 17:53:49 UTC",
+    "roundType": "No Program Specified",
+    "invitationsIssued": 800,
+    "lowestScoreCutoff": 505
+  },
+  {
+    "roundNumber": 260,
+    "roundDate": "August 02, 2023 at 13:50:04 UTC",
+    "roundType": "French language proficiency (Version 1)",
+    "invitationsIssued": 800,
+    "lowestScoreCutoff": 435
+  },
+  {
+    "roundNumber": 266,
+    "roundDate": "September 27, 2023 at 14:17:04 UTC",
+    "roundType": "French language proficiency (Version 1)",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 472
+  },
+  {
+    "roundNumber": 267,
+    "roundDate": "September 28, 2023 at 16:45:09 UTC",
+    "roundType": "Agriculture and agri-food occupations (Version 1)",
+    "invitationsIssued": 600,
+    "lowestScoreCutoff": 354
+  },
+  {
+    "roundNumber": 270,
+    "roundDate": "October 25, 2023 at 15:48:39 AM UTC",
+    "roundType": "French language proficiency (Version 1)",
+    "invitationsIssued": 300,
+    "lowestScoreCutoff": 486
+  },
+  {
+    "roundNumber": 277,
+    "roundDate": "December 20, 2023 at 15:55:23 UTC",
+    "roundType": "Transport occupations (Version 1)",
+    "invitationsIssued": 670,
+    "lowestScoreCutoff": 435
+  },
+  {
+    "roundNumber": 278,
+    "roundDate": "December 21, 2023 at 14:15:42 UTC",
+    "roundType": "Agriculture and agri-food occupations (Version 1)",
+    "invitationsIssued": 400,
+    "lowestScoreCutoff": 386
+  },
+  {
+    "roundNumber": 281,
+    "roundDate": "January 31, 2024 at 15:18:02 UTC",
+    "roundType": "General",
+    "invitationsIssued": 730,
+    "lowestScoreCutoff": 541
+  },
+  {
+    "roundNumber": 285,
+    "roundDate": "February 16, 2024 at 15:18:05 UTC",
+    "roundType": "Agriculture and agri-food occupations (Version 1)",
+    "invitationsIssued": 150,
+    "lowestScoreCutoff": 437
+  },
+  {
+    "roundNumber": 289,
+    "roundDate": "March 13, 2024 at 16:16:01 UTC",
+    "roundType": "Transport occupations (Version 1)",
+    "invitationsIssued": 975,
+    "lowestScoreCutoff": 430
+  },
+  {
+    "roundNumber": 299,
+    "roundDate": "July 2, 2024 at 15:12:05 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 920,
+    "lowestScoreCutoff": 739
+  },
+  {
+    "roundNumber": 306,
+    "roundDate": "July 30, 2024 at 15:25:21 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 964,
+    "lowestScoreCutoff": 686
+  },
+  {
+    "roundNumber": 308,
+    "roundDate": "August 13, 2024 at 14:57:21 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 763,
+    "lowestScoreCutoff": 690
+  },
+  {
+    "roundNumber": 313,
+    "roundDate": "September 09, 2024 at 15:42:40 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 911,
+    "lowestScoreCutoff": 732
+  },
+  {
+    "roundNumber": 317,
+    "roundDate": "October 09, 2024 at 14:22:23 UTC",
+    "roundType": "Canadian Experience Class",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 539
+  },
+  {
+    "roundNumber": 319,
+    "roundDate": "October 21, 2024 at 15:12:14 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 648,
+    "lowestScoreCutoff": 791
+  },
+  {
+    "roundNumber": 320,
+    "roundDate": "October 22, 2024 at 14:07:18 UTC",
+    "roundType": "Canadian Experience Class",
+    "invitationsIssued": 400,
+    "lowestScoreCutoff": 539
+  },
+  {
+    "roundNumber": 322,
+    "roundDate": "November 12, 2024 at 16:12:30 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 733,
+    "lowestScoreCutoff": 812
+  },
+  {
+    "roundNumber": 323,
+    "roundDate": "November 13, 2024 at 15:58:05 UTC",
+    "roundType": "Canadian Experience Class",
+    "invitationsIssued": 400,
+    "lowestScoreCutoff": 547
+  },
+  {
+    "roundNumber": 324,
+    "roundDate": "November 15, 2024 at 13:37:27 UTC",
+    "roundType": "French language proficiency (Version 1)",
+    "invitationsIssued": 800,
+    "lowestScoreCutoff": 478
+  },
+  {
+    "roundNumber": 325,
+    "roundDate": "November 18, 2024 at 15:50:45 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 174,
+    "lowestScoreCutoff": 816
+  },
+  {
+    "roundNumber": 326,
+    "roundDate": "November 19, 2024 at 14:38:41 UTC",
+    "roundType": "Canadian Experience Class",
+    "invitationsIssued": 400,
+    "lowestScoreCutoff": 539
+  },
+  {
+    "roundNumber": 328,
+    "roundDate": "December 02, 2024 at 15:37:54 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 676,
+    "lowestScoreCutoff": 705
+  },
+  {
+    "roundNumber": 329,
+    "roundDate": "December 03, 2024 at 15:44:17 UTC",
+    "roundType": "French language proficiency (Version 1)",
+    "invitationsIssued": 800,
+    "lowestScoreCutoff": 466
+  },
+  {
+    "roundNumber": 331,
+    "roundDate": "January 7, 2025 at 16:06:45 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 471,
+    "lowestScoreCutoff": 793
+  },
+  {
+    "roundNumber": 334,
+    "roundDate": "February 04, 2025 at 16:23:47 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 455,
+    "lowestScoreCutoff": 802
+  },
+  {
+    "roundNumber": 336,
+    "roundDate": "February 17, 2025 at 14:42:17 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 646,
+    "lowestScoreCutoff": 750
+  },
+  {
+    "roundNumber": 338,
+    "roundDate": "March 03, 2025 at 15:15:56 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 725,
+    "lowestScoreCutoff": 667
+  },
+  {
+    "roundNumber": 340,
+    "roundDate": "March 17, 2025 at 15:33:36 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 536,
+    "lowestScoreCutoff": 736
+  },
+  {
+    "roundNumber": 342,
+    "roundDate": "April 14, 2025 at 13:49:47 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 825,
+    "lowestScoreCutoff": 764
+  },
+  {
+    "roundNumber": 343,
+    "roundDate": "April 28, 2025 at 14:18:27 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 421,
+    "lowestScoreCutoff": 727
+  },
+  {
+    "roundNumber": 345,
+    "roundDate": "May 02, 2025 at 16:14:46 UTC",
+    "roundType": "Healthcare and social services occupations (Version 2)",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 510
+  },
+  {
+    "roundNumber": 346,
+    "roundDate": "May 12, 2025 at 14:14:40 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 511,
+    "lowestScoreCutoff": 706
+  },
+  {
+    "roundNumber": 347,
+    "roundDate": "May 13, 2025 at 14:57:30 UTC",
+    "roundType": "Canadian Experience Class",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 547
+  },
+  {
+    "roundNumber": 348,
+    "roundDate": "June 02, 2025 at 17:04:42 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 277,
+    "lowestScoreCutoff": 726
+  },
+  {
+    "roundNumber": 349,
+    "roundDate": "June 04, 2025 at 13:54:24 UTC",
+    "roundType": "Healthcare and social services occupations (Version 2)",
+    "invitationsIssued": 500,
+    "lowestScoreCutoff": 504
+  },
+  {
+    "roundNumber": 350,
+    "roundDate": "June 10, 2025 at 13:57:34 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 125,
+    "lowestScoreCutoff": 784
+  },
+  {
+    "roundNumber": 352,
+    "roundDate": "June 23, 2025 at 15:42:14 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 503,
+    "lowestScoreCutoff": 742
+  },
+  {
+    "roundNumber": 354,
+    "roundDate": "July 07, 2025 at 14:17:56 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 356,
+    "lowestScoreCutoff": 750
+  },
+  {
+    "roundNumber": 356,
+    "roundDate": "July 21, 2025 at 14:03:32 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 202,
+    "lowestScoreCutoff": 788
+  },
+  {
+    "roundNumber": 358,
+    "roundDate": "August 06, 2025 at 14:38:42 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 225,
+    "lowestScoreCutoff": 739
+  },
+  {
+    "roundNumber": 361,
+    "roundDate": "August 18, 2025 at 15:09:26 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 192,
+    "lowestScoreCutoff": 800
+  },
+  {
+    "roundNumber": 363,
+    "roundDate": "September 02, 2025 at 15:41:02 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 249,
+    "lowestScoreCutoff": 772
+  },
+  {
+    "roundNumber": 366,
+    "roundDate": "September 15, 2025 at 15:05:49 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 228,
+    "lowestScoreCutoff": 746
+  },
+  {
+    "roundNumber": 369,
+    "roundDate": "September 29, 2025 at 14:30:10 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 291,
+    "lowestScoreCutoff": 855
+  },
+  {
+    "roundNumber": 372,
+    "roundDate": "October 14, 2025 at 14:34:42 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 345,
+    "lowestScoreCutoff": 778
+  },
+  {
+    "roundNumber": 374,
+    "roundDate": "October 27, 2025 at 14:49:22 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 302,
+    "lowestScoreCutoff": 761
+  },
+  {
+    "roundNumber": 377,
+    "roundDate": "November 10, 2025 at 15:23:48 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 714,
+    "lowestScoreCutoff": 738
+  },
+  {
+    "roundNumber": 380,
+    "roundDate": "November 25, 2025 at 11:49:30 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 777,
+    "lowestScoreCutoff": 699
+  },
+  {
+    "roundNumber": 386,
+    "roundDate": "December 15, 2025 at 14:39:41 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 399,
+    "lowestScoreCutoff": 731
+  },
+  {
+    "roundNumber": 389,
+    "roundDate": "January 05, 2026 at 13:51:42 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 574,
+    "lowestScoreCutoff": 711
+  },
+  {
+    "roundNumber": 391,
+    "roundDate": "January 20, 2026 at 12:31:58 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 681,
+    "lowestScoreCutoff": 746
+  },
+  {
+    "roundNumber": 393,
+    "roundDate": "February 3, 2026 at 13:21:40 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 423,
+    "lowestScoreCutoff": 749
+  },
+  {
+    "roundNumber": 395,
+    "roundDate": "February 16, 2026 at 14:28:06 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 279,
+    "lowestScoreCutoff": 789
+  },
+  {
+    "roundNumber": 397,
+    "roundDate": "February 19, 2026 at 14:24:23 UTC",
+    "roundType": "Physicians with Canadian Work Experience, 2026-Version 1",
+    "invitationsIssued": 391,
+    "lowestScoreCutoff": 169
+  },
+  {
+    "roundNumber": 399,
+    "roundDate": "March 02, 2026 at 14:18:39 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 264,
+    "lowestScoreCutoff": 710
+  },
+  {
+    "roundNumber": 402,
+    "roundDate": "March 5, 2026 at 11:49:49 UTC",
+    "roundType": "Senior managers with Canadian Work Experience, 2026-Version 1",
+    "invitationsIssued": 250,
+    "lowestScoreCutoff": 429
+  },
+  {
+    "roundNumber": 403,
+    "roundDate": "March 16, 2026 at 11:32:52 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 362,
+    "lowestScoreCutoff": 742
+  },
+  {
+    "roundNumber": 406,
+    "roundDate": "March 30, 2026 at 10:49:36 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 356,
+    "lowestScoreCutoff": 802
+  },
+  {
+    "roundNumber": 409,
+    "roundDate": "April 13, 2026 at 10:51:11 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 324,
+    "lowestScoreCutoff": 786
+  },
+  {
+    "roundNumber": 412,
+    "roundDate": "April 27, 2026 at 10:47:44 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 473,
+    "lowestScoreCutoff": 795
+  },
+  {
+    "roundNumber": 415,
+    "roundDate": "May 11, 2026 at 11:06:08 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 380,
+    "lowestScoreCutoff": 798
+  },
+  {
+    "roundNumber": 416,
+    "roundDate": "May 25, 2026 at 15:22:56 UTC",
+    "roundType": "Provincial Nominee Program",
+    "invitationsIssued": 334,
+    "lowestScoreCutoff": 805
+  }
+]
