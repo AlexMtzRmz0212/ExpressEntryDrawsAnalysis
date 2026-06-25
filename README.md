@@ -29,7 +29,8 @@ ExpressEntryDrawsAnalysis/
 ├── lib/
 │   ├── __init__.py
 │   ├── ircc.py               # Fetches + parses the IRCC JSON feed
-│   └── db.py                 # Supabase client, get_all_draws(), upsert_draws()
+│   ├── db.py                 # Supabase client, get_all_draws(), upsert_draws()
+│   └── checker.py            # Change detection — compares IRCC vs DB draw numbers
 │
 ├── sql/
 │   └── schema.sql            # Run once in Supabase to create the draws table
@@ -95,6 +96,7 @@ On every `POST /api/refresh` call:
 |---|---|---|---|
 | `GET` | `/api/draws` | All draws from the database, newest first | None |
 | `POST` | `/api/refresh` | Fetch live IRCC data and upsert into Supabase | `Authorization: Bearer <REFRESH_SECRET>` |
+| `GET` | `/api/cron` | Change-detection check — upserts only if IRCC has new draws | `Authorization: Bearer <CRON_SECRET>` |
 
 **`GET /api/draws` response shape:**
 ```json
@@ -141,8 +143,9 @@ The `raw_data JSONB` column stores the complete original IRCC record. Any fields
 | Variable | Where to find it |
 |---|---|
 | `SUPABASE_URL` | Supabase project → Settings → API → Project URL |
-| `SUPABASE_SERVICE_KEY` | Supabase project → Settings → API → `service_role` key |
+| `SUPABASE_SERVICE_KEY` | Supabase project → Settings → API → `service_role` key (`sb_secret_...`) |
 | `REFRESH_SECRET` | Any long random string you choose |
+| `CRON_SECRET` | Any long random string you choose — Vercel injects it as a Bearer token on cron calls |
 
 Copy `.env.example` to `.env` for local development. On Vercel, add them in **Project → Settings → Environment Variables** — they are never stored in a file on the server.
 
@@ -264,6 +267,7 @@ vercel
 vercel env add SUPABASE_URL
 vercel env add SUPABASE_SERVICE_KEY
 vercel env add REFRESH_SECRET
+vercel env add CRON_SECRET
 
 # Deploy to production
 vercel --prod
@@ -300,9 +304,29 @@ curl -X POST https://EE.bittobyte.qzz.io/api/refresh \
 |---|---|---|
 | 1 | Data backend — IRCC fetch, Supabase DB, REST API | Done |
 | 2 | Frontend — React + Vite + Tailwind dashboard | Done |
-| 3 | Scheduled auto-refresh (cron) | Planned |
+| 3 | Scheduled auto-refresh with change detection | Done |
 | 4 | Admin dashboard / manual refresh UI | Planned |
 | 5 | CORS hardening + rate limiting | Planned |
+
+### Module 3 — how the cron works
+
+Instead of blindly upserting all draws on a fixed schedule, `/api/cron`:
+
+1. Reads the highest `draw_number` in Supabase (one row query)
+2. Fetches the full IRCC JSON (~100 KB)
+3. Compares: if `ircc_max > db_max` → upserts **only the new draws**
+4. Otherwise returns `{"status": "no_change"}` and does nothing
+
+Vercel calls `GET /api/cron` every 4 hours and automatically sends `Authorization: Bearer <CRON_SECRET>`. Add `CRON_SECRET` in **Vercel → Project → Settings → Environment Variables**.
+
+> **Vercel plan note:** Cron jobs require the **Pro plan** for intervals shorter than 1 day. Free (Hobby) accounts can use `"0 20 * * *"` (once daily at 8 PM UTC / 4 PM EDT) as a fallback. Change the `schedule` field in `vercel.json` accordingly.
+
+To test the cron locally:
+
+```bash
+curl http://localhost:8000/api/cron \
+  -H "Authorization: Bearer your-cron-secret"
+```
 
 ---
 

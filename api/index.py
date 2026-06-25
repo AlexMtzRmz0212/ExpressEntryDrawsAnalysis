@@ -4,6 +4,7 @@ Express Entry Draws Intelligence — API
 Routes:
   GET  /api/draws    — return all draws from the database (newest first)
   POST /api/refresh  — fetch live IRCC data and upsert into the database
+  GET  /api/cron     — change-detection check; upserts only when IRCC has new draws
 
 The `handler` name is required by Vercel's Python runtime (Mangum adapter).
 """
@@ -16,7 +17,7 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
-from lib import db, ircc
+from lib import checker, db, ircc
 
 load_dotenv()  # picks up .env in local dev; Vercel injects env vars directly
 
@@ -75,6 +76,25 @@ async def refresh_draws(authorization: str = Header(default="")) -> dict:
         "already_present": already_present,
         "total_in_db": total,
     }
+
+
+@app.get("/api/cron")
+async def cron_detect(authorization: str = Header(default="")) -> dict:
+    """
+    Change-detection cron endpoint — called by Vercel's scheduler every 4 hours.
+
+    Checks if the IRCC feed has a draw_number higher than what is in the DB.
+    Only performs a DB write when new draws are actually found; most calls do
+    nothing and return immediately.
+
+    Vercel automatically includes  Authorization: Bearer <CRON_SECRET>  in
+    cron requests when the CRON_SECRET environment variable is set.
+    """
+    secret = os.environ.get("CRON_SECRET", "")
+    if not secret or authorization != f"Bearer {secret}":
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    return await checker.check_and_refresh()
 
 
 # Vercel Python runtime entry point
