@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+body {
+  background: #f1efe9;
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  color: #16223d;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+}
+
+::selection {
+  background: #c8362b;
+  color: #fff;
+}
+
+input:focus { outline: none; }
+
+@keyframes ee-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.35; transform: scale(0.7); }
+}
+.pulse-dot { animation: ee-pulse 1.8s ease-in-out infinite; }
