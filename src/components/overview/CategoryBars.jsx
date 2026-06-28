@@ -27,9 +27,9 @@ export default function CategoryBars({ draws }) {
 
   return (
     <section style={{ background: '#fff', border: '1px solid #e2ded3', borderRadius: 12, padding: '22px 24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Invitations by category</h2>
-        <div style={{ display: 'flex', gap: 4, background: '#f1efe9', padding: 3, borderRadius: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, background: '#f1efe9', padding: 3, borderRadius: 8 }}>
           {years.map(y => (
             <button key={y} onClick={() => setCatYear(y)} style={{
               border: 'none', cursor: 'pointer',

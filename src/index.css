@@ -11,6 +11,7 @@ body {
   -webkit-font-smoothing: antialiased;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 ::selection {
@@ -69,4 +70,13 @@ input:focus { outline: none; }
     gap: 28px;
     align-items: center;
   }
+}
+
+.rhythm-stat-val {
+  font-size: 26px;
+  font-weight: 800;
+  font-family: 'Spline Sans Mono', monospace;
+}
+@media (max-width: 480px) {
+  .rhythm-stat-val { font-size: 20px; }
 }

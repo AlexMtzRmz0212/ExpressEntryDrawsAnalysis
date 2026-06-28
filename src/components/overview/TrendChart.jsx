@@ -77,7 +77,7 @@ export default function TrendChart({ draws }) {
           <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>CRS cutoff over time</h2>
           <p style={{ margin: '4px 0 0', fontSize: 13, color: '#5b6172' }}>{subtitle}</p>
         </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxWidth: 560, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxWidth: '100%', justifyContent: 'flex-start' }}>
           {FILTER_DEFS.map(f => (
             <button key={f.key} onClick={() => { setFilter(f.key); setHover(null); }} style={{
               display: 'flex', alignItems: 'center', gap: 6,
