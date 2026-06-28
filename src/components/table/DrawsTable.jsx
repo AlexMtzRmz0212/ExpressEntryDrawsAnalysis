@@ -103,9 +103,16 @@ export default function DrawsTable({ draws }) {
                   {r.dateLabel}
                 </td>
                 <td style={{ padding: '11px 12px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-                    <span style={{ width: 9, height: 9, borderRadius: '50%', background: r.color, display: 'inline-block' }} />
-                    {r.typeLabel}
+                  <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 2 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                      <span style={{ width: 9, height: 9, borderRadius: '50%', background: r.color, flexShrink: 0, display: 'inline-block' }} />
+                      {r.typeLabel}
+                    </span>
+                    {r.subcategory && (
+                      <span style={{ fontSize: 11, color: '#8a8f9e', paddingLeft: 16 }}>
+                        {r.subcategory}
+                      </span>
+                    )}
                   </span>
                 </td>
                 <td style={{ padding: '11px 12px', textAlign: 'right', fontFamily: "'Spline Sans Mono',monospace" }}>

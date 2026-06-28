@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
-import { getDrawType, cat } from '../utils/categories';
+import { getDrawType, getDrawSubcategory, cat } from '../utils/categories';
 import { fmtDate, fmtNum } from '../utils/format';
 
 function enrich(d) {
   const type = getDrawType(d.draw_name);
   const { label, color } = cat(type);
+  const subcategory = getDrawSubcategory(d.draw_name);
   return {
     ...d,
     type,
     typeLabel: label,
     color,
+    subcategory,
     dateLabel: fmtDate(d.draw_date),
     invLabel: fmtNum(d.invitations),
   };
