@@ -81,7 +81,7 @@ async def refresh_draws(authorization: str = Header(default="")) -> dict:
 @app.get("/api/cron")
 async def cron_detect(authorization: str = Header(default="")) -> dict:
     """
-    Change-detection cron endpoint — called by Vercel's scheduler every 4 hours.
+    Change-detection cron endpoint — called by Vercel's scheduler every day.
 
     Checks if the IRCC feed has a draw_number higher than what is in the DB.
     Only performs a DB write when new draws are actually found; most calls do

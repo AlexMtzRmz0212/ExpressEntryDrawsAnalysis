@@ -63,8 +63,8 @@ def _coerce_round(raw: dict) -> dict | None:
     Normalise a single IRCC round dict into our schema shape.
     Returns None if mandatory fields are missing.
     """
-    draw_number = _parse_int(raw.get("drawNumber"))
-    if draw_number is None:
+    draw_number = str(raw.get("drawNumber") or "").strip()
+    if not draw_number:
         logger.warning("Skipping round with missing drawNumber: %s", raw)
         return None
 

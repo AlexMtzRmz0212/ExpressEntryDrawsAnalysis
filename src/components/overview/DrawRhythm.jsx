@@ -15,10 +15,11 @@ export default function DrawRhythm({ draws }) {
       <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Draw rhythm</h2>
       <p style={{ margin: '4px 0 0', fontSize: 13, color: '#5b6172' }}>Days between consecutive draws</p>
 
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 96, marginTop: 18 }}>
-        {gaps.map((g, i) => (
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 96, marginTop: 18, overflow: 'hidden' }}>
+        {gaps.slice(-80).map((g, i) => (
           <div key={i} title={`${g.days} days · before #${g.draw.draw_number}`} style={{
             flex: 1,
+            minWidth: 0,
             height: (8 + (g.days / gapMax) * 88) + 'px',
             background: g.days <= avgGap ? '#3a6ea8' : '#c08a2d',
             borderRadius: '3px 3px 0 0',

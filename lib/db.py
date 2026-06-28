@@ -35,7 +35,8 @@ def get_all_draws() -> list[dict]:
     response = (
         client.table("draws")
         .select("*")
-        .order("draw_number", desc=True)
+        .order("draw_date", desc=True)
+        .order("draw_number", desc=True)  # tiebreaker for same-date draws (e.g. 91a/91b)
         .execute()
     )
     return response.data or []

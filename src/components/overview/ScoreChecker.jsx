@@ -35,9 +35,8 @@ export default function ScoreChecker({ draws }) {
   }, [input, draws]);
 
   return (
-    <section style={{
+    <section className="score-grid" style={{
       background: '#16223d', color: '#fff', borderRadius: 12, padding: '24px 26px', marginTop: 14,
-      display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 28, alignItems: 'center',
     }}>
       <div>
         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Check your CRS score</h2>

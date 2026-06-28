@@ -9,7 +9,7 @@ export default function Overview({ draws }) {
     <div>
       <HeroStats draws={draws} />
       <TrendChart draws={draws} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: 14, marginTop: 14 }}>
+      <div className="side-grid">
         <CategoryBars draws={draws} />
         <DrawRhythm draws={draws} />
       </div>

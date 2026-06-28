@@ -1,9 +1,12 @@
 """
 Change detection for IRCC Express Entry draws.
 
-Fetches the IRCC JSON, compares the latest draw_number against what is
-already in Supabase, and only triggers an upsert when new draws are found.
+Fetches the IRCC JSON, compares the total draw count against what is already
+in Supabase, and only triggers an upsert when new draws are found.
 This keeps cron runs cheap — most of the time they do nothing.
+
+Count-based detection is used instead of max(draw_number) because draw numbers
+can contain letter suffixes (e.g. "91a", "91b") that cannot be compared as integers.
 """
 
 import logging
@@ -13,89 +16,79 @@ from lib import db, ircc
 logger = logging.getLogger(__name__)
 
 
-def get_latest_db_draw_number() -> int:
-    """Return the highest draw_number currently in Supabase, or 0 if empty."""
+def get_db_draw_count() -> int:
+    """Return the number of draws currently in Supabase, or 0 if empty."""
     client = db.get_client()
     response = (
         client.table("draws")
-        .select("draw_number")
-        .order("draw_number", desc=True)
-        .limit(1)
+        .select("draw_number", count="exact")
         .execute()
     )
-    if response.data:
-        return response.data[0]["draw_number"]
-    return 0
+    return response.count or 0
 
 
 async def check_and_refresh() -> dict:
     """
     Core change-detection logic.
 
-    1. Read the highest draw_number from the DB (one row query — fast).
+    1. Count draws in the DB (one query — fast).
     2. Fetch all draws from IRCC (one HTTP request — ~100 KB JSON).
-    3. If IRCC has draws with a higher number → upsert only the new ones.
+    3. If IRCC has more draws than DB → upsert all (on_conflict is idempotent).
     4. Otherwise return immediately — nothing to do.
 
     Returns a status dict that the /api/cron endpoint passes back as JSON.
     """
-    # Step 1 — what is the latest draw we already have?
+    # Step 1 — how many draws do we already have?
     try:
-        db_latest = get_latest_db_draw_number()
+        db_count = get_db_draw_count()
     except Exception as exc:
         logger.error("DB read failed: %s", exc)
         return {"status": "db_error", "error": str(exc)}
 
-    logger.info("DB latest draw_number: %d", db_latest)
+    logger.info("DB draw count: %d", db_count)
 
     # Step 2 — fetch IRCC
     try:
         all_draws = await ircc.fetch_draws()
     except Exception as exc:
         logger.error("IRCC fetch failed: %s", exc)
-        return {"status": "ircc_error", "error": str(exc), "db_latest": db_latest}
+        return {"status": "ircc_error", "error": str(exc), "db_count": db_count}
 
     if not all_draws:
         logger.warning("IRCC returned zero draws")
-        return {"status": "ircc_empty", "db_latest": db_latest}
+        return {"status": "ircc_empty", "db_count": db_count}
 
-    # Step 3 — compare
-    ircc_latest = max(d["draw_number"] for d in all_draws)
-    logger.info("IRCC latest draw_number: %d", ircc_latest)
+    ircc_count = len(all_draws)
+    logger.info("IRCC draw count: %d", ircc_count)
 
-    if ircc_latest <= db_latest:
+    # Step 3 — compare counts
+    if ircc_count <= db_count:
         logger.info(
-            "No new draws (IRCC latest=%d, DB latest=%d) — nothing to do.",
-            ircc_latest,
-            db_latest,
+            "No new draws (IRCC=%d, DB=%d) — nothing to do.", ircc_count, db_count
         )
         return {
             "status": "no_change",
-            "db_latest": db_latest,
-            "ircc_latest": ircc_latest,
+            "db_count": db_count,
+            "ircc_count": ircc_count,
         }
 
-    # Step 4 — upsert only draws we don't already have
-    new_draws = [d for d in all_draws if d["draw_number"] > db_latest]
-    new_numbers = [d["draw_number"] for d in new_draws]
-    logger.info("New draw(s) detected: %s — upserting.", new_numbers)
+    # Step 4 — upsert all draws; on_conflict handles existing rows idempotently
+    logger.info("New draws detected (IRCC=%d > DB=%d) — upserting.", ircc_count, db_count)
 
     try:
-        inserted, already_present = db.upsert_draws(new_draws)
+        inserted, already_present = db.upsert_draws(all_draws)
     except Exception as exc:
         logger.error("Upsert failed: %s", exc)
         return {
             "status": "db_error",
             "error": str(exc),
-            "db_latest": db_latest,
-            "ircc_latest": ircc_latest,
-            "new_draw_numbers": new_numbers,
+            "db_count": db_count,
+            "ircc_count": ircc_count,
         }
 
     return {
         "status": "updated",
-        "db_latest_before": db_latest,
-        "ircc_latest": ircc_latest,
-        "new_draw_numbers": new_numbers,
+        "db_count_before": db_count,
+        "ircc_count": ircc_count,
         "inserted": inserted,
     }

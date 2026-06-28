@@ -7,7 +7,7 @@ const TABS = [
 export default function TabNav({ tab, setTab }) {
   return (
     <nav style={{
-      display: 'flex', gap: 4, marginTop: 18, background: '#e6e2d8',
+      display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 18, background: '#e6e2d8',
       padding: 4, borderRadius: 10, width: 'max-content', maxWidth: '100%',
     }}>
       {TABS.map(t => (

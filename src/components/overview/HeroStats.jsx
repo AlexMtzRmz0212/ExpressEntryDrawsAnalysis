@@ -37,7 +37,7 @@ export default function HeroStats({ draws }) {
   if (!latest) return null;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', gap: 14, marginTop: 22 }}>
+    <div className="hero-grid">
       {/* Latest draw */}
       <div style={{ background: '#16223d', color: '#fff', borderRadius: 12, padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ fontSize: 12, letterSpacing: '.12em', textTransform: 'uppercase', color: '#9fb0d4', fontWeight: 600 }}>

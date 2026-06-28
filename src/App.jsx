@@ -23,7 +23,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-warm-bg" style={{ padding: '0 24px 80px' }}>
+    <div className="app-padding min-h-screen bg-warm-bg">
       <div style={{ maxWidth: 1180, margin: '0 auto' }}>
         <Header updatedAt={updatedAt} loading={loading} />
         <TabNav tab={tab} setTab={setTab} />

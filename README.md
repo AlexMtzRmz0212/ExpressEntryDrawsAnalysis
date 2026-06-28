@@ -317,7 +317,7 @@ Instead of blindly upserting all draws on a fixed schedule, `/api/cron`:
 3. Compares: if `ircc_max > db_max` → upserts **only the new draws**
 4. Otherwise returns `{"status": "no_change"}` and does nothing
 
-Vercel calls `GET /api/cron` every 4 hours and automatically sends `Authorization: Bearer <CRON_SECRET>`. Add `CRON_SECRET` in **Vercel → Project → Settings → Environment Variables**.
+Vercel calls `GET /api/cron` every day at 12 pm UTC and automatically sends `Authorization: Bearer <CRON_SECRET>`. Add `CRON_SECRET` in **Vercel → Project → Settings → Environment Variables**.
 
 > **Vercel plan note:** Cron jobs require the **Pro plan** for intervals shorter than 1 day. Free (Hobby) accounts can use `"0 20 * * *"` (once daily at 8 PM UTC / 4 PM EDT) as a fallback. Change the `schedule` field in `vercel.json` accordingly.
 

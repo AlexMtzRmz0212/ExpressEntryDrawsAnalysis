@@ -23,7 +23,7 @@ export function getDrawType(drawName) {
   if (n.includes('agriculture') || n.includes('agri-food')) return 'Agriculture';
   if (n.includes('stem'))                               return 'STEM';
   if (n.includes('transport'))                          return 'Transport';
-  return 'General';
+  return drawName.trim();
 }
 
 export function cat(type) {
