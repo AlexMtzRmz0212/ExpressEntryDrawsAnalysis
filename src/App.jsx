@@ -3,12 +3,16 @@ import { useDraws } from './hooks/useDraws';
 import { fmtDate } from './utils/format';
 import Header from './components/Header';
 import TabNav from './components/TabNav';
-import Overview from './components/overview/Overview';
+import Latest from './components/latest/Latest';
+import CRS from './components/crs/CRS';
+import Cadence from './components/cadence/Cadence';
 import Predictions from './components/predictions/Predictions';
 import DrawsTable from './components/table/DrawsTable';
+import Glossary from './components/Glossary';
 
 export default function App() {
-  const [tab, setTab] = useState('overview');
+  const [tab, setTab] = useState('latest');
+  const [glossaryOpen, setGlossaryOpen] = useState(false);
   const { draws, loading, error } = useDraws();
 
   const latest = draws[draws.length - 1];
@@ -25,16 +29,18 @@ export default function App() {
   return (
     <div className="app-padding min-h-screen bg-warm-bg">
       <div style={{ maxWidth: 1180, margin: '0 auto' }}>
-        <Header updatedAt={updatedAt} loading={loading} />
+        <Header updatedAt={updatedAt} loading={loading} onGlossary={() => setGlossaryOpen(true)} />
         <TabNav tab={tab} setTab={setTab} />
 
         {loading ? (
           <div style={{ marginTop: 32, color: '#8a8f9e', fontSize: 14 }}>Loading draw data…</div>
         ) : (
           <>
-            {tab === 'overview' && <Overview draws={draws} />}
-            {tab === 'predict'  && <Predictions draws={draws} />}
-            {tab === 'table'    && <DrawsTable draws={draws} />}
+            {tab === 'latest'     && <Latest draws={draws} />}
+            {tab === 'crs'        && <CRS draws={draws} />}
+            {tab === 'cadence'    && <Cadence draws={draws} />}
+            {tab === 'prediction' && <Predictions draws={draws} />}
+            {tab === 'table'      && <DrawsTable draws={draws} />}
           </>
         )}
 
@@ -42,6 +48,8 @@ export default function App() {
           Data sourced from the live IRCC feed · Not affiliated with IRCC or the Government of Canada
         </footer>
       </div>
+
+      <Glossary open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
     </div>
   );
 }

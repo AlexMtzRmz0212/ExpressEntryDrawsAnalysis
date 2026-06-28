@@ -1,4 +1,4 @@
-export default function Header({ updatedAt, loading }) {
+export default function Header({ updatedAt, loading, onGlossary }) {
   return (
     <header style={{
       display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
@@ -23,16 +23,32 @@ export default function Header({ updatedAt, loading }) {
         </div>
       </div>
 
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px',
-        background: '#fff', border: '1px solid #e2ded3', borderRadius: 999,
-        fontSize: 12.5, fontFamily: "'Spline Sans Mono',monospace",
-      }}>
-        <span className="pulse-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#2f8f6b', display: 'inline-block' }} />
-        <span style={{ color: '#5b6172' }}>Live feed</span>
-        <span style={{ color: '#16223d', fontWeight: 500 }}>
-          · updated {loading ? '…' : updatedAt}
-        </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button
+          onClick={onGlossary}
+          style={{
+            border: '1px solid #e2ded3', cursor: 'pointer', fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px',
+            background: '#fff', borderRadius: 999, fontSize: 12.5, fontWeight: 600,
+            color: '#42485a', transition: 'background .15s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = '#f0ede6'}
+          onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+        >
+          <span style={{ fontSize: 14 }}>📖</span> Glossary
+        </button>
+
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px',
+          background: '#fff', border: '1px solid #e2ded3', borderRadius: 999,
+          fontSize: 12.5, fontFamily: "'Spline Sans Mono',monospace",
+        }}>
+          <span className="pulse-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#2f8f6b', display: 'inline-block' }} />
+          <span style={{ color: '#5b6172' }}>Live feed</span>
+          <span style={{ color: '#16223d', fontWeight: 500 }}>
+            · updated {loading ? '…' : updatedAt}
+          </span>
+        </div>
       </div>
     </header>
   );

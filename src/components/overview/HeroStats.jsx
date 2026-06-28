@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { fmtNum } from '../../utils/format';
-import { computeGaps } from '../../utils/stats';
 
 function StatCard({ label, value, unit, sub }) {
   return (
@@ -18,7 +17,7 @@ function StatCard({ label, value, unit, sub }) {
 }
 
 export default function HeroStats({ draws }) {
-  const { latest, deltaLabel, deltaColor, avgGap } = useMemo(() => {
+  const { latest, deltaLabel, deltaColor } = useMemo(() => {
     if (!draws.length) return {};
     const latest = draws[draws.length - 1];
 
@@ -28,10 +27,7 @@ export default function HeroStats({ draws }) {
     const deltaLabel = delta === null ? '—' : (delta > 0 ? '+' : '') + delta;
     const deltaColor = delta === null ? '#8a8f9e' : delta > 0 ? '#c8362b' : delta < 0 ? '#2f8f6b' : '#8a8f9e';
 
-    const gaps = computeGaps(draws).map(g => g.days);
-    const avgGap = gaps.length ? Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) : 0;
-
-    return { latest, deltaLabel, deltaColor, avgGap };
+    return { latest, deltaLabel, deltaColor };
   }, [draws]);
 
   if (!latest) return null;
@@ -74,7 +70,6 @@ export default function HeroStats({ draws }) {
         <div style={{ fontSize: 12.5, color: '#5b6172', marginTop: 6 }}>CRS points</div>
       </div>
 
-      <StatCard label="Draw cadence" value={String(avgGap)} unit="d" sub="avg between draws" />
     </div>
   );
 }

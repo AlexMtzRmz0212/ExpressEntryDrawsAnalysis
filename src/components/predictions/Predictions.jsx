@@ -1,5 +1,4 @@
 import ForecastCard from './ForecastCard';
-import CategoryOutlook from './CategoryOutlook';
 import { computePrediction } from '../../utils/stats';
 import { useMemo } from 'react';
 
@@ -24,8 +23,6 @@ export default function Predictions({ draws }) {
           </div>
         </section>
       </div>
-
-      <CategoryOutlook draws={draws} />
     </div>
   );
 }

@@ -7,10 +7,7 @@ Project Description
 ### Todo
 
 - [ ] Each category tab  
-- [ ] Current Tab  
-- [ ] Optimize for mobile  
 - [ ] All collumns shown  
-- [ ] Draws: 91a and 91b  
 
 ### In Progress
 
@@ -18,5 +15,8 @@ Project Description
 
 ### Done ✓
 
+- [x] Current Tab  
+- [x] Optimize for mobile  
+- [x] Draws: 91a and 91b  
 - [x] wrong categories  
 

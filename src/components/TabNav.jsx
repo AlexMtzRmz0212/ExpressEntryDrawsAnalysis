@@ -1,7 +1,9 @@
 const TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'predict',  label: 'Predictions' },
-  { id: 'table',    label: 'All draws' },
+  { id: 'latest',     label: 'Latest' },
+  { id: 'crs',        label: 'CRS' },
+  { id: 'cadence',    label: 'Cadence' },
+  { id: 'prediction', label: 'Prediction' },
+  { id: 'table',      label: 'All Draws' },
 ];
 
 export default function TabNav({ tab, setTab }) {
