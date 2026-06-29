@@ -1,6 +1,6 @@
 export const CAT = {
   General:     { label: 'General',        color: '#16223d' },
-  CEC:         { label: 'Canadian Exp',  color: '#3a6ea8' },
+  CEC:         { label: 'CEC',  color: '#3a6ea8' },
   PNP:         { label: 'Provincial',     color: '#6d4c91' },
   French:      { label: 'French',         color: '#c8362b' },
   Healthcare:  { label: 'Healthcare',     color: '#2f8f6b' },

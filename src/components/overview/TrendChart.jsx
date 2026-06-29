@@ -8,7 +8,7 @@ const FILTER_DEFS = [
   { key: 'Core',       label: 'Core',          dot: '#16223d', test: d => d.type === 'General' || d.type === 'CEC' },
   { key: 'All',        label: 'All draws',     dot: '#8a8f9e', test: () => true },
   { key: 'General',    label: 'General',       dot: '#16223d', test: d => d.type === 'General' },
-  { key: 'CEC',        label: 'Canadian Exp.', dot: '#3a6ea8', test: d => d.type === 'CEC' },
+  { key: 'CEC',        label: 'CEC', dot: '#3a6ea8', test: d => d.type === 'CEC' },
   { key: 'PNP',        label: 'Provincial',    dot: '#6d4c91', test: d => d.type === 'PNP' },
   { key: 'French',     label: 'French',        dot: '#c8362b', test: d => d.type === 'French' },
   { key: 'Healthcare', label: 'Healthcare',    dot: '#2f8f6b', test: d => d.type === 'Healthcare' },
