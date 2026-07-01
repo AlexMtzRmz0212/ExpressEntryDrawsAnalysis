@@ -46,6 +46,18 @@ export default function App() {
 
         <footer style={{ marginTop: 26, fontSize: 12, color: '#9a9eaa', textAlign: 'center', lineHeight: 1.6 }}>
           Data sourced from the live IRCC feed · Not affiliated with IRCC or the Government of Canada
+          <div style={{ marginTop: 6 }}>
+            Built by{' '}
+            <a
+              href="https://alex.bittobyte.qzz.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#5b6172', fontWeight: 600, textDecoration: 'underline' }}
+            >
+              BitToByte
+            </a>
+            {' '}· let's connect
+          </div>
         </footer>
       </div>
 
