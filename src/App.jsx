@@ -54,9 +54,35 @@ export default function App() {
               rel="noopener noreferrer"
               style={{ color: '#5b6172', fontWeight: 600, textDecoration: 'underline' }}
             >
-              BitToByte
+              Alex
             </a>
             {' '}· let's connect
+          </div>
+          <div
+            style={{
+              marginTop: 10,
+              display: 'flex',
+              gap: 16,
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            {[
+              { label: 'BitToByte', href: 'https://bittobyte.qzz.io' },
+              { label: 'Portfolio', href: 'https://alex.bittobyte.qzz.io' },
+              { label: 'Express Entry', href: 'https://EE.bittobyte.qzz.io' },
+              { label: 'AI Checklist', href: 'https://checklist.bittobyte.qzz.io' },
+            ].map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#5b6172', textDecoration: 'none' }}
+              >
+                {l.label}
+              </a>
+            ))}
           </div>
         </footer>
       </div>
