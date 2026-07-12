@@ -29,11 +29,15 @@ ExpressEntryDrawsAnalysis/
 ├── lib/
 │   ├── __init__.py
 │   ├── ircc.py               # Fetches + parses the IRCC JSON feed
-│   ├── db.py                 # Supabase client, get_all_draws(), upsert_draws()
-│   └── checker.py            # Change detection — compares IRCC vs DB draw numbers
+│   ├── db.py                 # Supabase client, draws + sync_runs helpers
+│   └── checker.py            # Change detection — set-difference of IRCC vs DB draw numbers
+│
+├── .github/
+│   └── workflows/
+│       └── refresh.yml       # Backup scheduler — pings /api/refresh 6×/day (reliability)
 │
 ├── sql/
-│   └── schema.sql            # Run once in Supabase to create the draws table
+│   └── schema.sql            # Run once in Supabase to create the draws + sync_runs tables
 │
 ├── src/
 │   ├── main.jsx              # React entry point
@@ -95,6 +99,7 @@ On every `POST /api/refresh` call:
 | Method | Path | Description | Auth |
 |---|---|---|---|
 | `GET` | `/api/draws` | All draws from the database, newest first | None |
+| `GET` | `/api/status` | Most recent sync run (heartbeat — when data last updated) | None |
 | `POST` | `/api/refresh` | Fetch live IRCC data and upsert into Supabase | `Authorization: Bearer <REFRESH_SECRET>` |
 | `GET` | `/api/cron` | Change-detection check — upserts only if IRCC has new draws | `Authorization: Bearer <CRON_SECRET>` |
 
@@ -125,7 +130,7 @@ Run `sql/schema.sql` **once** in the Supabase SQL Editor before the first deploy
 
 ```sql
 CREATE TABLE IF NOT EXISTS draws (
-  draw_number  INTEGER     PRIMARY KEY,
+  draw_number  TEXT        PRIMARY KEY,   -- usually numeric, but IRCC uses suffixes too ("91a", "91b")
   draw_date    DATE        NOT NULL,
   draw_name    TEXT        NOT NULL,
   crs_cutoff   INTEGER     NOT NULL,
@@ -135,6 +140,10 @@ CREATE TABLE IF NOT EXISTS draws (
   fetched_at   TIMESTAMPTZ DEFAULT NOW()
 );
 ```
+
+`draw_number` is **`TEXT`**, not an integer: IRCC has issued suffixed rounds such as
+`91a`/`91b`, which an integer column cannot store. The full `sql/schema.sql` also creates a
+`sync_runs` heartbeat table (see below).
 
 The `raw_data JSONB` column stores the complete original IRCC record. Any fields IRCC adds in the future are automatically preserved there, even before a schema migration.
 
@@ -312,20 +321,59 @@ curl -X POST https://EE.bittobyte.qzz.io/api/refresh \
 
 Instead of blindly upserting all draws on a fixed schedule, `/api/cron`:
 
-1. Reads the highest `draw_number` in Supabase (one row query)
+1. Reads the **set** of `draw_number`s already in Supabase (one query)
 2. Fetches the full IRCC JSON (~100 KB)
-3. Compares: if `ircc_max > db_max` → upserts **only the new draws**
+3. Upserts **only the draws whose `draw_number` is not already stored**
 4. Otherwise returns `{"status": "no_change"}` and does nothing
+5. Records a row in `sync_runs` (visible via `GET /api/status`)
 
-Vercel calls `GET /api/cron` every day at 12 pm UTC and automatically sends `Authorization: Bearer <CRON_SECRET>`. Add `CRON_SECRET` in **Vercel → Project → Settings → Environment Variables**.
+Set-membership detection is deliberate: comparing counts (or `max(draw_number)`) breaks on
+suffixed rounds like `91a`/`91b`, and a count comparison silently stops detecting new draws
+forever if the DB ever gets ahead of the feed's valid count.
 
-> **Vercel plan note:** Cron jobs require the **Pro plan** for intervals shorter than 1 day. Free (Hobby) accounts can use `"0 20 * * *"` (once daily at 8 PM UTC / 4 PM EDT) as a fallback. Change the `schedule` field in `vercel.json` accordingly.
+Vercel calls `GET /api/cron` on the `vercel.json` schedule and automatically sends
+`Authorization: Bearer <CRON_SECRET>`. **Cron schedules are always UTC** — `"0 12 * * *"`
+fires at 12:00 UTC, which is **8:00 AM EDT** (not noon Eastern). Add `CRON_SECRET` in
+**Vercel → Project → Settings → Environment Variables**.
+
+> **Vercel plan note:** On the **Hobby (free) plan**, cron jobs run at most once/day and are
+> **best-effort — they can be delayed or skipped entirely.** Do not rely on the Vercel cron
+> alone; the GitHub Actions backup scheduler below is what makes updates reliable.
 
 To test the cron locally:
 
 ```bash
 curl http://localhost:8000/api/cron \
   -H "Authorization: Bearer your-cron-secret"
+```
+
+### Reliable updates — GitHub Actions backup scheduler
+
+Because Hobby-plan Vercel crons are unreliable (and IRCC sometimes publishes its JSON feed a
+few hours after a round), `.github/workflows/refresh.yml` runs an **independent** scheduler on
+GitHub's infrastructure. It `POST`s `/api/refresh` **every 4 hours** (6×/day), so a skipped
+Vercel run or a late feed still gets picked up the same day. The upsert is idempotent, so the
+extra calls are cheap no-ops when there's nothing new.
+
+**One-time setup** — in **GitHub → repo → Settings → Secrets and variables → Actions**:
+
+| Kind | Name | Value |
+|---|---|---|
+| Secret | `REFRESH_SECRET` | Same value as the `REFRESH_SECRET` env var on Vercel |
+| Variable | `BASE_URL` | `https://ee.bittobyte.qzz.io` (optional — this is the default) |
+
+Trigger a run manually any time from the **Actions** tab → *Refresh Express Entry draws* →
+**Run workflow**.
+
+> **Note:** GitHub scheduled workflows only run from the **default branch**, may be delayed
+> under load, and are **auto-disabled after 60 days of no repo activity**. The manual
+> *Run workflow* button (`workflow_dispatch`) is always available as a fallback.
+
+### Checking when data last updated
+
+```bash
+curl https://ee.bittobyte.qzz.io/api/status
+# → { "last_sync": { "ran_at": "...", "status": "updated", "inserted": 1, ... } }
 ```
 
 ---

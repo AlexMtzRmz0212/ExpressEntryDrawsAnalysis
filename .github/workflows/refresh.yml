@@ -1,0 +1,54 @@
+name: Refresh Express Entry draws
+
+# Independent backup scheduler.
+#
+# Why this exists: Vercel's cron job (vercel.json → /api/cron) runs on the Hobby
+# plan, where scheduled jobs are best-effort — they can be delayed or skipped
+# entirely, and run at most once per day. That is what caused draws to be missed.
+# This workflow pings the refresh endpoint several times a day from GitHub's own
+# scheduler, so a skipped Vercel run (or IRCC publishing its JSON feed a few hours
+# after a round) still gets picked up the same day.
+#
+# /api/refresh does an unconditional, idempotent upsert (on_conflict=draw_number),
+# so calling it repeatedly is safe and cheap — existing draws are no-ops.
+#
+# Required repository configuration (Settings → Secrets and variables → Actions):
+#   Secret:   REFRESH_SECRET   — must match the REFRESH_SECRET env var on Vercel
+#   Variable: BASE_URL         — e.g. https://ee.bittobyte.qzz.io (optional; the
+#                                default below is used if the variable is unset)
+#
+# Note: GitHub scheduled workflows only run from the default branch, may be
+# delayed under load, and are auto-disabled after 60 days of repo inactivity.
+# Use "Run workflow" (workflow_dispatch) to trigger a run manually at any time.
+
+on:
+  schedule:
+    # Every 4 hours (UTC) = 6 attempts/day. Tolerates skipped runs + IRCC feed lag.
+    - cron: "0 */4 * * *"
+  workflow_dispatch: {}
+
+# Don't stack runs if a previous one is still going.
+concurrency:
+  group: refresh-draws
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger refresh endpoint
+        env:
+          REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+          BASE_URL: ${{ vars.BASE_URL || 'https://ee.bittobyte.qzz.io' }}
+        run: |
+          if [ -z "$REFRESH_SECRET" ]; then
+            echo "::error::REFRESH_SECRET secret is not set. Add it in Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "Calling $BASE_URL/api/refresh"
+          # -f fails the step on any 4xx/5xx; -sS keeps curl quiet but shows errors.
+          response=$(curl -fsS -X POST "$BASE_URL/api/refresh" \
+            -H "Authorization: Bearer $REFRESH_SECRET" \
+            -H "Content-Type: application/json")
+          echo "Response: $response"

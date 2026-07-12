@@ -3,6 +3,7 @@ Express Entry Draws Intelligence — API
 
 Routes:
   GET  /api/draws    — return all draws from the database (newest first)
+  GET  /api/status   — return the most recent sync run (heartbeat / last update)
   POST /api/refresh  — fetch live IRCC data and upsert into the database
   GET  /api/cron     — change-detection check; upserts only when IRCC has new draws
 
@@ -42,6 +43,21 @@ def get_draws() -> list[dict]:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
+@app.get("/api/status")
+def get_status() -> dict:
+    """
+    Return the most recent sync run so silent update failures are visible.
+
+    Useful to answer "when did the data last update, and did the last run
+    succeed?" without opening the database.
+    """
+    try:
+        last = db.get_last_sync()
+    except EnvironmentError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"last_sync": last}
+
+
 @app.post("/api/refresh")
 async def refresh_draws(authorization: str = Header(default="")) -> dict:
     """
@@ -70,6 +86,15 @@ async def refresh_draws(authorization: str = Header(default="")) -> dict:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     total = db.get_client().table("draws").select("draw_number", count="exact").execute().count or 0
+
+    # Heartbeat so /api/status reflects refreshes too (e.g. the GitHub Actions
+    # backup scheduler), not just /api/cron runs.
+    db.record_sync_run(
+        "updated" if inserted else "no_change",
+        ircc_count=len(draws),
+        db_count=total - inserted,
+        inserted=inserted,
+    )
 
     return {
         "inserted": inserted,
