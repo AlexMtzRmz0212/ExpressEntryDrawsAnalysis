@@ -47,8 +47,21 @@ jobs:
             exit 1
           fi
           echo "Calling $BASE_URL/api/refresh"
-          # -f fails the step on any 4xx/5xx; -sS keeps curl quiet but shows errors.
-          response=$(curl -fsS -X POST "$BASE_URL/api/refresh" \
-            -H "Authorization: Bearer $REFRESH_SECRET" \
-            -H "Content-Type: application/json")
-          echo "Response: $response"
+          # Retry transient failures. IRCC's canada.ca feed is flaky (timeouts,
+          # sporadic 403s), and /api/refresh returns 502 when that upstream fetch
+          # fails — but the upsert is idempotent, so retrying is safe. We drop
+          # curl's -f (which discards the body on 5xx) and instead capture the
+          # status + response body every attempt, so a real failure is legible.
+          http_code=""
+          for attempt in 1 2 3; do
+            http_code=$(curl -sS -o /tmp/refresh_resp.json -w "%{http_code}" \
+              -X POST "$BASE_URL/api/refresh" \
+              -H "Authorization: Bearer $REFRESH_SECRET" \
+              -H "Content-Type: application/json") || true
+            echo "Attempt $attempt -> HTTP ${http_code:-<no response>}"
+            echo "Response body:"; cat /tmp/refresh_resp.json 2>/dev/null; echo
+            [ "$http_code" = "200" ] && exit 0
+            [ "$attempt" != "3" ] && sleep 20
+          done
+          echo "::error::refresh failed after 3 attempts (last HTTP ${http_code:-<no response>}). See response body above."
+          exit 1
