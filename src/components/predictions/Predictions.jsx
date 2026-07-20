@@ -18,7 +18,7 @@ export default function Predictions({ draws }) {
             <li><strong>Size:</strong> mean invitations of recent core rounds.</li>
             <li><strong>Band &amp; confidence:</strong> derived from residual spread around the trend.</li>
           </ul>
-          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #eceae3', fontSize: 12.5, color: '#8a8f9e', lineHeight: 1.6 }}>
+          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #eceae3', fontSize: 12.5, color: '#6b7180', lineHeight: 1.6 }}>
             Estimates recompute automatically each time the live feed refreshes. Not affiliated with IRCC; for guidance only.
           </div>
         </section>

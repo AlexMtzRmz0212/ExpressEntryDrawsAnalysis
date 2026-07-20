@@ -1,17 +1,17 @@
 const TERMS = [
-  { term: 'CRS',    def: 'Comprehensive Ranking System — the points-based score used to rank Express Entry candidates.' },
-  { term: 'ITA',    def: 'Invitation to Apply — issued by IRCC to top-ranked candidates to apply for permanent residence.' },
+  { term: 'CRS',    def: 'Comprehensive Ranking System. The points-based score used to rank Express Entry candidates.' },
+  { term: 'ITA',    def: 'Invitation to Apply. Issued by IRCC to top-ranked candidates to apply for permanent residence.' },
   { term: 'Cutoff', def: 'The minimum CRS score required to receive an ITA in a given draw round.' },
   { term: 'Draw',   def: 'A selection round where IRCC issues ITAs to candidates above the cutoff score.' },
-  { term: 'EE',     def: 'Express Entry — the online management system for Canada\'s skilled worker immigration streams.' },
-  { term: 'CEC',    def: 'Canadian Experience Class — a stream for workers with at least one year of Canadian work experience.' },
-  { term: 'PNP',    def: 'Provincial Nominee Program — provincial programs that can nominate candidates, adding 600 CRS points.' },
-  { term: 'FSW',    def: 'Federal Skilled Worker — a stream for skilled workers with foreign work experience.' },
-  { term: 'FST',    def: 'Federal Skilled Trades — a stream for workers in eligible skilled trade occupations.' },
-  { term: 'IRCC',   def: 'Immigration, Refugees and Citizenship Canada — the federal department managing immigration.' },
-  { term: 'EOI',    def: 'Expression of Interest — a candidate profile submitted to the Express Entry pool.' },
-  { term: 'NOC',    def: 'National Occupational Classification — Canada\'s system for classifying and describing occupations.' },
-  { term: 'PR',     def: 'Permanent Residence — the immigration status granted after a successful application.' },
+  { term: 'EE',     def: 'Express Entry. The online management system for Canada\'s skilled worker immigration streams.' },
+  { term: 'CEC',    def: 'Canadian Experience Class. A stream for workers with at least one year of Canadian work experience.' },
+  { term: 'PNP',    def: 'Provincial Nominee Program. Provincial programs that can nominate candidates, adding 600 CRS points.' },
+  { term: 'FSW',    def: 'Federal Skilled Worker. A stream for skilled workers with foreign work experience.' },
+  { term: 'FST',    def: 'Federal Skilled Trades. A stream for workers in eligible skilled trade occupations.' },
+  { term: 'IRCC',   def: 'Immigration, Refugees and Citizenship Canada. The federal department managing immigration.' },
+  { term: 'EOI',    def: 'Expression of Interest. A candidate profile submitted to the Express Entry pool.' },
+  { term: 'NOC',    def: 'National Occupational Classification. Canada\'s system for classifying and describing occupations.' },
+  { term: 'PR',     def: 'Permanent Residence. The immigration status granted after a successful application.' },
 ];
 
 export default function Glossary({ open, onClose }) {
