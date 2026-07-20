@@ -45,7 +45,12 @@ export default function HeroStats({ draws }) {
           </div>
           <div style={{ fontSize: 13, color: '#9fb0d4' }}>CRS cutoff</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
+        {latest.subcategory && (
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginTop: 14 }}>
+            {latest.subcategory}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 12.5, fontWeight: 600, padding: '5px 11px', borderRadius: 999, background: latest.color, color: '#fff' }}>
             {latest.typeLabel}
           </span>

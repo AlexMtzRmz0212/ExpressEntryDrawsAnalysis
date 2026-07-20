@@ -28,7 +28,7 @@ export default function App() {
 
   return (
     <div className="app-padding min-h-screen bg-warm-bg">
-      <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
         <Header
           updatedAt={updatedAt}
           loading={loading}

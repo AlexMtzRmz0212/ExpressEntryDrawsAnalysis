@@ -1,7 +1,7 @@
 const TABS = [
   { id: 'latest',     label: 'Latest' },
   { id: 'crs',        label: 'CRS' },
-  { id: 'cadence',    label: 'Cadence' },
+  { id: 'cadence',    label: 'History' },
   { id: 'prediction', label: 'Prediction' },
   { id: 'table',      label: 'All Draws' },
 ];
