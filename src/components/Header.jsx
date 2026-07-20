@@ -51,17 +51,17 @@ export default function Header({ updatedAt, loading, status, refetch, onGlossary
       const r = await fetch('/api/check', { method: 'POST' });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) {
-        setMsg('Check failed — try later');
+        setMsg('Check failed, try later');
       } else if (data.allowed === false) {
         setMsg(data.reason === 'updated_today' ? 'Already updated today' : 'Checked recently');
       } else {
         const s = data.result?.status;
         if (s === 'updated') setMsg('New draw added!');
         else if (s === 'no_change') setMsg('No new draw yet');
-        else setMsg('Couldn’t reach IRCC — try later');
+        else setMsg('Couldn’t reach IRCC, try later');
       }
     } catch {
-      setMsg('Check failed — try later');
+      setMsg('Check failed, try later');
     } finally {
       setChecking(false);
       refetch?.({ silent: true }); // pull any new draws + refresh the lock state
@@ -115,7 +115,7 @@ export default function Header({ updatedAt, loading, status, refetch, onGlossary
             border: '1px solid #e2ded3', cursor: canCheck ? 'pointer' : 'default',
             fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6,
             padding: '9px 14px', background: canCheck ? '#16223d' : '#f0ede6',
-            color: canCheck ? '#fff' : '#8a8f9e', borderRadius: 999,
+            color: canCheck ? '#fff' : '#6b7180', borderRadius: 999,
             fontSize: 12.5, fontWeight: 600, transition: 'opacity .15s',
             opacity: checking ? 0.7 : 1,
           }}

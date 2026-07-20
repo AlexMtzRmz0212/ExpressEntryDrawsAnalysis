@@ -25,8 +25,8 @@ export default function ScoreChecker({ draws }) {
     }).filter(Boolean);
 
     let verdict, verdictColor;
-    if (wins >= 6)      { verdict = 'Strong — you clear most core draws';        verdictColor = '#7ed6a8'; }
-    else if (wins >= 2) { verdict = 'Competitive — borderline on core draws';    verdictColor = '#f0c674'; }
+    if (wins >= 6)      { verdict = 'Strong. You clear most core draws';         verdictColor = '#7ed6a8'; }
+    else if (wins >= 2) { verdict = 'Competitive. Borderline on core draws';     verdictColor = '#f0c674'; }
     else                { verdict = 'Below recent core cutoffs';                  verdictColor = '#e89b87'; }
 
     const detail = `You would have been invited in ${wins} of the last ${core.length} core (General/CEC) draws. That is ${gap >= 0 ? '+' + gap : gap} vs. the latest core cutoff of ${lastCut}.`;
@@ -48,6 +48,7 @@ export default function ScoreChecker({ draws }) {
             value={input}
             onChange={e => setInput(e.target.value)}
             inputMode="numeric"
+            aria-label="Your CRS score"
             placeholder="e.g. 515"
             style={{
               width: 130, fontFamily: "'Spline Sans Mono',monospace", fontSize: 22, fontWeight: 600,
@@ -78,7 +79,7 @@ export default function ScoreChecker({ draws }) {
             </div>
           </>
         ) : (
-          <div style={{ fontSize: 13.5, color: '#6b7187' }}>Enter a score to see your standing.</div>
+          <div style={{ fontSize: 13.5, color: '#8a93ab' }}>Enter a score to see your standing.</div>
         )}
       </div>
     </section>

@@ -9,10 +9,12 @@ import Cadence from './components/cadence/Cadence';
 import Predictions from './components/predictions/Predictions';
 import DrawsTable from './components/table/DrawsTable';
 import Glossary from './components/Glossary';
+import Legal from './components/Legal';
 
 export default function App() {
   const [tab, setTab] = useState('latest');
   const [glossaryOpen, setGlossaryOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
   const { draws, loading, error, status, refetch } = useDraws();
 
   const latest = draws[draws.length - 1];
@@ -39,7 +41,7 @@ export default function App() {
         <TabNav tab={tab} setTab={setTab} />
 
         {loading ? (
-          <div style={{ marginTop: 32, color: '#8a8f9e', fontSize: 14 }}>Loading draw data…</div>
+          <div style={{ marginTop: 32, color: '#5b6172', fontSize: 14 }}>Loading draw data…</div>
         ) : (
           <>
             {tab === 'latest'     && <Latest draws={draws} />}
@@ -50,8 +52,28 @@ export default function App() {
           </>
         )}
 
-        <footer style={{ marginTop: 26, fontSize: 12, color: '#9a9eaa', textAlign: 'center', lineHeight: 1.6 }}>
+        <footer style={{ marginTop: 26, fontSize: 12, color: '#5b6172', textAlign: 'center', lineHeight: 1.6 }}>
           Data sourced from the live IRCC feed · Not affiliated with IRCC or the Government of Canada
+          <div style={{ marginTop: 8, display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setLegalOpen(true)}
+              style={{
+                border: 'none', background: 'none', padding: 0, cursor: 'pointer',
+                font: 'inherit', color: '#5b6172', textDecoration: 'underline',
+              }}
+            >
+              Privacy Policy
+            </button>
+            <button
+              onClick={() => setLegalOpen(true)}
+              style={{
+                border: 'none', background: 'none', padding: 0, cursor: 'pointer',
+                font: 'inherit', color: '#5b6172', textDecoration: 'underline',
+              }}
+            >
+              Terms of Use
+            </button>
+          </div>
           <div style={{ marginTop: 6 }}>
             Built by{' '}
             <a
@@ -94,6 +116,7 @@ export default function App() {
       </div>
 
       <Glossary open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
+      <Legal open={legalOpen} onClose={() => setLegalOpen(false)} />
     </div>
   );
 }

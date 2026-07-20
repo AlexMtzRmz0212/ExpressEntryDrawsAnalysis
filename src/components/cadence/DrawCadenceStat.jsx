@@ -9,12 +9,12 @@ export default function DrawCadenceStat({ draws }) {
 
   return (
     <div style={{ background: '#fff', border: '1px solid #e2ded3', borderRadius: 12, padding: 20 }}>
-      <div style={{ fontSize: 11.5, letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a8f9e', fontWeight: 600 }}>
+      <div style={{ fontSize: 11.5, letterSpacing: '.1em', textTransform: 'uppercase', color: '#6b7180', fontWeight: 600 }}>
         Draw cadence
       </div>
       <div style={{ fontSize: 34, fontWeight: 800, fontFamily: "'Spline Sans Mono',monospace", marginTop: 8, letterSpacing: '-.02em' }}>
         {String(avgGap)}
-        <span style={{ fontSize: 16, color: '#8a8f9e' }}>d</span>
+        <span style={{ fontSize: 16, color: '#6b7180' }}>d</span>
       </div>
       <div style={{ fontSize: 12.5, color: '#5b6172', marginTop: 6 }}>avg between draws</div>
     </div>

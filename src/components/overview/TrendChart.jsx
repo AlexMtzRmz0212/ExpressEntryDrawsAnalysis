@@ -61,8 +61,8 @@ export default function TrendChart({ draws }) {
     });
 
     const subtitle =
-      filter === 'All'  ? 'Every stream — note the high Provincial Nominee spikes (CRS includes the 600-point nomination).' :
-      filter === 'Core' ? 'General and Canadian Experience Class rounds — the economic mainstream.' :
+      filter === 'All'  ? 'Every stream. Note the high Provincial Nominee spikes (CRS includes the 600-point nomination).' :
+      filter === 'Core' ? 'General and Canadian Experience Class rounds, the economic mainstream.' :
       cat(filter).label + ' rounds only.';
 
     return { points, linePath, areaPath, yTicks, xTicks, subtitle };
@@ -95,15 +95,15 @@ export default function TrendChart({ draws }) {
       </div>
 
       <div style={{ position: 'relative', marginTop: 16 }} onMouseLeave={() => setHover(null)}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Line chart of CRS cutoff over time. ${subtitle}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}>
           {yTicks.map((t, i) => (
             <g key={i}>
               <line x1={padL} y1={t.y} x2={W - padR} y2={t.y} stroke="#eceae3" strokeWidth={1} />
-              <text x={padL - 8} y={t.ty} textAnchor="end" fontSize={12} fill="#a3a7b3" fontFamily="'Spline Sans Mono',monospace">{t.label}</text>
+              <text x={padL - 8} y={t.ty} textAnchor="end" fontSize={12} fill="#6b7180" fontFamily="'Spline Sans Mono',monospace">{t.label}</text>
             </g>
           ))}
           {xTicks.map((t, i) => (
-            <text key={i} x={t.x} y={H - 8} textAnchor="middle" fontSize={11.5} fill="#a3a7b3" fontFamily="'Spline Sans Mono',monospace">{t.label}</text>
+            <text key={i} x={t.x} y={H - 8} textAnchor="middle" fontSize={11.5} fill="#6b7180" fontFamily="'Spline Sans Mono',monospace">{t.label}</text>
           ))}
           <path d={areaPath} fill="rgba(22,34,61,0.06)" />
           <path d={linePath} fill="none" stroke="#16223d" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />

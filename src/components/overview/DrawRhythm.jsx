@@ -52,7 +52,7 @@ export default function DrawRhythm({ draws }) {
         ].map(({ val, label }) => (
           <div key={label} style={{ flex: 1, minWidth: 0 }}>
             <div className="rhythm-stat-val">{val}d</div>
-            <div style={{ fontSize: 11.5, color: '#8a8f9e', textTransform: 'uppercase', letterSpacing: '.08em', marginTop: 2 }}>{label}</div>
+            <div style={{ fontSize: 11.5, color: '#6b7180', textTransform: 'uppercase', letterSpacing: '.08em', marginTop: 2 }}>{label}</div>
           </div>
         ))}
       </div>

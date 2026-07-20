@@ -10,7 +10,7 @@ export default function CategoryOutlook({ draws }) {
       const list = draws.filter(d => d.type === type);
       if (!list.length) return null;
       const last = list[list.length - 1];
-      let trend = '→', trendColor = '#8a8f9e';
+      let trend = '→', trendColor = '#6b7180';
       if (list.length >= 2) {
         const prev = list[list.length - 2];
         const dd = last.crs_cutoff - prev.crs_cutoff;
@@ -36,7 +36,7 @@ export default function CategoryOutlook({ draws }) {
               <div style={{ fontSize: 28, fontWeight: 800, fontFamily: "'Spline Sans Mono',monospace" }}>{o.crs}</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: o.trendColor }}>{o.trend}</div>
             </div>
-            <div style={{ fontSize: 11.5, color: '#8a8f9e', marginTop: 4 }}>last round · {o.dateLabel}</div>
+            <div style={{ fontSize: 11.5, color: '#6b7180', marginTop: 4 }}>last round · {o.dateLabel}</div>
           </div>
         ))}
       </div>

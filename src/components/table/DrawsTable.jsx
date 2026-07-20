@@ -53,7 +53,7 @@ export default function DrawsTable({ draws }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
         <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>
           All draws{' '}
-          <span style={{ fontFamily: "'Spline Sans Mono',monospace", color: '#a3a7b3', fontWeight: 500, fontSize: 14 }}>
+          <span style={{ fontFamily: "'Spline Sans Mono',monospace", color: '#6b7180', fontWeight: 500, fontSize: 14 }}>
             ({rows.length})
           </span>
         </h2>
@@ -109,7 +109,7 @@ export default function DrawsTable({ draws }) {
                       {r.typeLabel}
                     </span>
                     {r.subcategory && (
-                      <span style={{ fontSize: 11, color: '#8a8f9e', paddingLeft: 16 }}>
+                      <span style={{ fontSize: 11, color: '#6b7180', paddingLeft: 16 }}>
                         {r.subcategory}
                       </span>
                     )}
