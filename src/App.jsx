@@ -13,7 +13,7 @@ import Glossary from './components/Glossary';
 export default function App() {
   const [tab, setTab] = useState('latest');
   const [glossaryOpen, setGlossaryOpen] = useState(false);
-  const { draws, loading, error } = useDraws();
+  const { draws, loading, error, status, refetch } = useDraws();
 
   const latest = draws[draws.length - 1];
   const updatedAt = latest ? fmtDate(latest.draw_date) : '—';
@@ -29,7 +29,13 @@ export default function App() {
   return (
     <div className="app-padding min-h-screen bg-warm-bg">
       <div style={{ maxWidth: 1180, margin: '0 auto' }}>
-        <Header updatedAt={updatedAt} loading={loading} onGlossary={() => setGlossaryOpen(true)} />
+        <Header
+          updatedAt={updatedAt}
+          loading={loading}
+          status={status}
+          refetch={refetch}
+          onGlossary={() => setGlossaryOpen(true)}
+        />
         <TabNav tab={tab} setTab={setTab} />
 
         {loading ? (

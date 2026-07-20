@@ -3,8 +3,9 @@ Express Entry Draws Intelligence — API
 
 Routes:
   GET  /api/draws    — return all draws from the database (newest first)
-  GET  /api/status   — return the most recent sync run (heartbeat / last update)
-  POST /api/refresh  — fetch live IRCC data and upsert into the database
+  GET  /api/status   — most recent sync run + public-button cooldown state
+  POST /api/refresh  — fetch live IRCC data and upsert into the database (secret)
+  POST /api/check    — public "Check now" trigger; change-detection, rate-limited
   GET  /api/cron     — change-detection check; upserts only when IRCC has new draws
 
 The `handler` name is required by Vercel's Python runtime (Mangum adapter).
@@ -12,6 +13,7 @@ The `handler` name is required by Vercel's Python runtime (Mangum adapter).
 
 import logging
 import os
+from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
@@ -19,6 +21,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from lib import checker, db, ircc
+
+# Public "Check now" cooldown: after a check that finds NO new draw, the button
+# is locked for this long (anti-spam). After a check that DOES find a draw, it is
+# locked until the next UTC day instead. Both are tunable one-liners.
+MISS_COOLDOWN = timedelta(hours=1)
 
 load_dotenv()  # picks up .env in local dev; Vercel injects env vars directly
 
@@ -32,6 +39,58 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization"],
 )
+
+
+def _parse_ts(value: str | None) -> datetime | None:
+    """Parse a Supabase timestamptz string to an aware UTC datetime, or None."""
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def _manual_check_state() -> dict:
+    """
+    Decide whether the public "Check now" button may trigger a live IRCC fetch.
+
+    Enforced server-side (not just hidden in the UI) so it can't be bypassed by a
+    reload, a fresh browser, or a direct API call. Derived entirely from the
+    existing sync_runs heartbeat — no extra table.
+
+    Returns {allowed, reason, unlock_at}:
+      * updated_today    — a new draw was already found today (UTC); locked until
+                           the next UTC midnight. The scheduled cron keeps running.
+      * recently_checked — some sync ran within MISS_COOLDOWN; locked until then.
+      * None reason      — allowed.
+    """
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Rule 1 — has any run already found a new draw today?
+    updated = db.get_last_updated_sync_since(today_start.isoformat())
+    if updated is not None:
+        return {
+            "allowed": False,
+            "reason": "updated_today",
+            "unlock_at": (today_start + timedelta(days=1)).isoformat(),
+        }
+
+    # Rule 2 — did any run happen within the miss-cooldown window?
+    last = db.get_last_sync()
+    ran_at = _parse_ts(last.get("ran_at")) if last else None
+    if ran_at is not None and now - ran_at < MISS_COOLDOWN:
+        return {
+            "allowed": False,
+            "reason": "recently_checked",
+            "unlock_at": (ran_at + MISS_COOLDOWN).isoformat(),
+        }
+
+    return {"allowed": True, "reason": None, "unlock_at": None}
 
 
 @app.get("/api/draws")
@@ -53,9 +112,10 @@ def get_status() -> dict:
     """
     try:
         last = db.get_last_sync()
+        manual_check = _manual_check_state()
     except EnvironmentError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return {"last_sync": last}
+    return {"last_sync": last, "manual_check": manual_check}
 
 
 @app.post("/api/refresh")
@@ -101,6 +161,39 @@ async def refresh_draws(authorization: str = Header(default="")) -> dict:
         "already_present": already_present,
         "total_in_db": total,
     }
+
+
+@app.post("/api/check")
+async def manual_check() -> dict:
+    """
+    Public, unauthenticated "Check now" trigger for the frontend button.
+
+    Lets a visitor who believes a new draw just dropped force a live IRCC check,
+    without exposing REFRESH_SECRET. Abuse is bounded server-side by a two-tier
+    cooldown (see `_manual_check_state`): at most one IRCC fetch per hour, and
+    none for the rest of the UTC day once a new draw has been found.
+
+    Response:
+      { allowed: false, reason, unlock_at }            — locked; no IRCC call made
+      { allowed: true, result: {...}, manual_check }   — ran; result is the
+                                                          check_and_refresh() dict,
+                                                          manual_check is the new lock
+    """
+    try:
+        state = _manual_check_state()
+    except EnvironmentError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    if not state["allowed"]:
+        return state
+
+    # Allowed — run change detection (fetches IRCC, writes only if new + records
+    # a heartbeat). check_and_refresh handles its own errors and never raises.
+    result = await checker.check_and_refresh()
+
+    # Recompute so the client immediately gets the fresh lock: "updated" → locked
+    # until tomorrow, "no_change" → locked for MISS_COOLDOWN.
+    return {"allowed": True, "result": result, "manual_check": _manual_check_state()}
 
 
 @app.get("/api/cron")

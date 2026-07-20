@@ -129,3 +129,26 @@ def get_last_sync() -> dict | None:
     )
     data = response.data or []
     return data[0] if data else None
+
+
+def get_last_updated_sync_since(since_iso: str) -> dict | None:
+    """
+    Return the most recent sync_runs row with status='updated' whose ran_at is
+    at or after `since_iso` (an ISO-8601 timestamp), or None.
+
+    Used by the public "Check now" cooldown to answer "has a new draw already
+    been found today?" — checking *any* updated run in the window, not just the
+    latest row, so a subsequent no_change cron run cannot erase the lock.
+    """
+    client = get_client()
+    response = (
+        client.table("sync_runs")
+        .select("*")
+        .eq("status", "updated")
+        .gte("ran_at", since_iso)
+        .order("ran_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    data = response.data or []
+    return data[0] if data else None

@@ -23,8 +23,12 @@ name: Refresh Express Entry draws
 
 on:
   schedule:
-    # Every 4 hours (UTC) = 6 attempts/day. Tolerates skipped runs + IRCC feed lag.
-    - cron: "0 */4 * * *"
+    # Windowed poll: every 3h across 09:00–21:00 UTC only (09/12/15/18/21), the
+    # span in which IRCC realistically publishes a round's JSON. No overnight runs.
+    # Minute :23 (not :00) dodges the congested top-of-hour GitHub cron slot and
+    # avoids colliding with the Vercel daily cron. Off-window draws (rare) are
+    # caught by the 09:23 run, the Vercel daily cron, or a user's "Check now" press.
+    - cron: "23 9,12,15,18,21 * * *"
   workflow_dispatch: {}
 
 # Don't stack runs if a previous one is still going.

@@ -34,7 +34,7 @@ ExpressEntryDrawsAnalysis/
 │
 ├── .github/
 │   └── workflows/
-│       └── refresh.yml       # Backup scheduler — pings /api/refresh 6×/day (reliability)
+│       └── refresh.yml       # Backup scheduler — pings /api/refresh every 3h, 09–21 UTC
 │
 ├── sql/
 │   └── schema.sql            # Run once in Supabase to create the draws + sync_runs tables
@@ -99,7 +99,8 @@ On every `POST /api/refresh` call:
 | Method | Path | Description | Auth |
 |---|---|---|---|
 | `GET` | `/api/draws` | All draws from the database, newest first | None |
-| `GET` | `/api/status` | Most recent sync run (heartbeat — when data last updated) | None |
+| `GET` | `/api/status` | Most recent sync run + public-button cooldown state | None |
+| `POST` | `/api/check` | Public "Check now" trigger — change-detection, rate-limited server-side | None |
 | `POST` | `/api/refresh` | Fetch live IRCC data and upsert into Supabase | `Authorization: Bearer <REFRESH_SECRET>` |
 | `GET` | `/api/cron` | Change-detection check — upserts only if IRCC has new draws | `Authorization: Bearer <CRON_SECRET>` |
 
@@ -332,8 +333,9 @@ suffixed rounds like `91a`/`91b`, and a count comparison silently stops detectin
 forever if the DB ever gets ahead of the feed's valid count.
 
 Vercel calls `GET /api/cron` on the `vercel.json` schedule and automatically sends
-`Authorization: Bearer <CRON_SECRET>`. **Cron schedules are always UTC** — `"0 12 * * *"`
-fires at 12:00 UTC, which is **8:00 AM EDT** (not noon Eastern). Add `CRON_SECRET` in
+`Authorization: Bearer <CRON_SECRET>`. **Cron schedules are always UTC** — `"7 12 * * *"`
+fires at 12:07 UTC, which is **8:07 AM EDT** (not noon Eastern). The `:07` minute (rather
+than `:00`) avoids the congested top-of-hour cron slot. Add `CRON_SECRET` in
 **Vercel → Project → Settings → Environment Variables**.
 
 > **Vercel plan note:** On the **Hobby (free) plan**, cron jobs run at most once/day and are
@@ -351,9 +353,12 @@ curl http://localhost:8000/api/cron \
 
 Because Hobby-plan Vercel crons are unreliable (and IRCC sometimes publishes its JSON feed a
 few hours after a round), `.github/workflows/refresh.yml` runs an **independent** scheduler on
-GitHub's infrastructure. It `POST`s `/api/refresh` **every 4 hours** (6×/day), so a skipped
-Vercel run or a late feed still gets picked up the same day. The upsert is idempotent, so the
-extra calls are cheap no-ops when there's nothing new.
+GitHub's infrastructure. It `POST`s `/api/refresh` **every 3 hours across 09:00–21:00 UTC**
+(`23 9,12,15,18,21 * * *` → 09:23, 12:23, 15:23, 18:23, 21:23) — the window in which IRCC
+realistically publishes a round. There are **no overnight runs**; an off-window draw is caught
+by the 09:23 run, the Vercel daily cron, or a user pressing **Check now** (see below). The
+`:23` minute dodges the congested top-of-hour slot, and the upsert is idempotent, so the extra
+calls are cheap no-ops when there's nothing new.
 
 **One-time setup** — in **GitHub → repo → Settings → Secrets and variables → Actions**:
 
@@ -369,11 +374,38 @@ Trigger a run manually any time from the **Actions** tab → *Refresh Express En
 > under load, and are **auto-disabled after 60 days of no repo activity**. The manual
 > *Run workflow* button (`workflow_dispatch`) is always available as a fallback.
 
+### On-demand updates — the public "Check now" button
+
+A visitor who believes a round just dropped can force a live IRCC check from the header
+button, which calls **`POST /api/check`**. It runs the same change-detection as the cron
+(fetching IRCC and writing only if there's a genuinely new draw) but needs **no secret** —
+abuse is bounded **server-side**, not by hiding the button:
+
+- If a new draw was **already found today** (UTC) — by any scheduler or a previous press — the
+  endpoint returns `{ "allowed": false, "reason": "updated_today", "unlock_at": "<next UTC midnight>" }`
+  and makes **no** IRCC call. The button stays locked until tomorrow; the scheduled cron keeps
+  running normally.
+- Otherwise, if **any sync ran within the last hour**, it returns
+  `{ "allowed": false, "reason": "recently_checked", "unlock_at": "<ran_at + 1h>" }` — again no
+  IRCC call.
+- Otherwise it runs the check and returns `{ "allowed": true, "result": { ... }, "manual_check": { ... } }`.
+
+Net effect: IRCC is hit **at most once per hour** from the button (and not again for the rest
+of the day once a draw is found), no matter how many people press it. The two thresholds are
+one-line constants (`MISS_COOLDOWN` and the UTC day boundary) in `api/index.py`. The current
+lock state is also exposed on `GET /api/status` under `manual_check`, which is how the frontend
+decides whether to enable the button.
+
+```bash
+curl -X POST https://ee.bittobyte.qzz.io/api/check
+# → { "allowed": true, "result": { "status": "no_change", ... }, "manual_check": { ... } }
+```
+
 ### Checking when data last updated
 
 ```bash
 curl https://ee.bittobyte.qzz.io/api/status
-# → { "last_sync": { "ran_at": "...", "status": "updated", "inserted": 1, ... } }
+# → { "last_sync": { "ran_at": "...", "status": "updated", ... }, "manual_check": { ... } }
 ```
 
 ---
