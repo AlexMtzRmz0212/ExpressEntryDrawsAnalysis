@@ -31,9 +31,9 @@ export default function TrendChart({ draws }) {
     setSelected(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
   };
 
-  const { series, yTicks, xTicks, flatPoints } = useMemo(() => {
+  const { series, yTicks, xTicks, flatPoints, subtitle } = useMemo(() => {
     const view = draws.filter(d => selected.includes(d.type));
-    if (!view.length) return { series: [], yTicks: [], xTicks: [], flatPoints: [] };
+    if (!view.length) return { series: [], yTicks: [], xTicks: [], flatPoints: [], subtitle: '' };
 
     // Shared Y scale over every selected draw so lines stay comparable.
     const ys = view.map(d => d.crs_cutoff);
@@ -91,13 +91,18 @@ export default function TrendChart({ draws }) {
     });
 
     const flatPoints = series.flatMap(s => s.points);
+
+    const picked = orderTypes(selected.filter(t => categories.includes(t)));
+    const names = picked.map(t => cat(t).label);
     const subtitle =
-      selected === 'All'  ? 'Every stream. Note the high Provincial Nominee spikes (CRS includes the 600-point nomination).' :
-      selected === 'Core' ? 'General and Canadian Experience Class rounds, the economic mainstream.' :
-      cat(selected).label + ' rounds only.';
+      picked.length === categories.length
+        ? 'Every stream. Note the high Provincial Nominee spikes (CRS includes the 600-point nomination).'
+        : names.length === 1
+          ? `${names[0]} rounds only.`
+          : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]} rounds.`;
 
     return { series, yTicks, xTicks, flatPoints, subtitle };
-  }, [draws, selected, mode]);
+  }, [draws, selected, mode, categories]);
 
   const hoverPoint = hover !== null ? flatPoints.find(p => p.draw_number === hover) : null;
 
