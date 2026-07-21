@@ -8,6 +8,7 @@ import CRS from './components/crs/CRS';
 import Cadence from './components/cadence/Cadence';
 import Predictions from './components/predictions/Predictions';
 import DrawsTable from './components/table/DrawsTable';
+import Subscribe from './components/subscribe/Subscribe';
 import Glossary from './components/Glossary';
 import Legal from './components/Legal';
 
@@ -51,6 +52,9 @@ export default function App() {
             {tab === 'table'      && <DrawsTable draws={draws} />}
           </>
         )}
+
+        {/* Sits outside the tab switch so it is reachable from every view. */}
+        <Subscribe onLegal={() => setLegalOpen(true)} />
 
         <footer style={{ marginTop: 26, fontSize: 12, color: '#5b6172', textAlign: 'center', lineHeight: 1.6 }}>
           Data sourced from the live IRCC feed · Not affiliated with IRCC or the Government of Canada

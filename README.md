@@ -29,8 +29,12 @@ ExpressEntryDrawsAnalysis/
 ├── lib/
 │   ├── __init__.py
 │   ├── ircc.py               # Fetches + parses the IRCC JSON feed
-│   ├── db.py                 # Supabase client, draws + sync_runs helpers
-│   └── checker.py            # Change detection — set-difference of IRCC vs DB draw numbers
+│   ├── db.py                 # Supabase client, draws + sync_runs + subscribers helpers
+│   ├── checker.py            # Change detection — set-difference of IRCC vs DB draw numbers
+│   ├── emailer.py            # Resend REST client (send_one / send_batch), never raises
+│   ├── drawstats.py          # Per-draw stats for the email (Python mirror of src/utils)
+│   ├── templates.py          # Email HTML + confirm/unsubscribe landing pages
+│   └── notifier.py           # Notification outbox — claims a draw, then sends it
 │
 ├── .github/
 │   └── workflows/
@@ -103,6 +107,10 @@ On every `POST /api/refresh` call:
 | `POST` | `/api/check` | Public "Check now" trigger — change-detection, rate-limited server-side | None |
 | `POST` | `/api/refresh` | Fetch live IRCC data and upsert into Supabase | `Authorization: Bearer <REFRESH_SECRET>` |
 | `GET` | `/api/cron` | Change-detection check — upserts only if IRCC has new draws | `Authorization: Bearer <CRON_SECRET>` |
+| `POST` | `/api/subscribe` | Double opt-in signup for draw alert emails — sends a confirmation link | None |
+| `GET` | `/api/confirm` | Confirmation landing page (`?token=...`) — activates a subscription | None |
+| `GET`/`POST` | `/api/unsubscribe` | One-click unsubscribe landing page (`?token=...`) | None |
+| `POST` | `/api/notify` | Drain the notification outbox — emails subscribers about unsent draws | `Authorization: Bearer <REFRESH_SECRET>` |
 
 **`GET /api/draws` response shape:**
 ```json
@@ -156,6 +164,11 @@ The `raw_data JSONB` column stores the complete original IRCC record. Any fields
 | `SUPABASE_SERVICE_KEY` | Supabase project → Settings → API → `service_role` key (`sb_secret_...`) |
 | `REFRESH_SECRET` | Any long random string you choose |
 | `CRON_SECRET` | Any long random string you choose — Vercel injects it as a Bearer token on cron calls |
+| `RESEND_API_KEY` | resend.com → API Keys. Leave unset to disable all outbound email |
+| `MAIL_FROM` | e.g. `Express Entry Draws <notifications@ee.bittobyte.qzz.io>` — domain must be verified in Resend |
+| `ADMIN_EMAIL` | Where "someone subscribed / unsubscribed" alerts go. Unset = no alerts |
+| `SITE_URL` | Public base URL, used to build confirm and unsubscribe links |
+| `MAIL_SENDER_ADDRESS` | Postal address printed in every subscriber email. **Required by CASL** |
 
 Copy `.env.example` to `.env` for local development. On Vercel, add them in **Project → Settings → Environment Variables** — they are never stored in a file on the server.
 
@@ -406,6 +419,92 @@ curl -X POST https://ee.bittobyte.qzz.io/api/check
 ```bash
 curl https://ee.bittobyte.qzz.io/api/status
 # → { "last_sync": { "ran_at": "...", "status": "updated", ... }, "manual_check": { ... } }
+```
+
+---
+
+## Email notifications
+
+Visitors can subscribe to get an email each time IRCC publishes a new round. Each message
+carries the CRS cutoff and invitation count, the change versus the previous round in the same
+category, a bar chart of recent cutoffs for that category, and year-to-date totals.
+
+### Why the outbox, instead of sending from the refresh code
+
+Three different code paths insert draws: `/api/cron` and `/api/check` (both via
+`lib/checker.py`), and `/api/refresh`, which the GitHub Actions scheduler calls directly.
+Sending mail inline from `checker` would miss the third, and two paths waking at the same
+moment could send the same draw twice.
+
+So sending is queue-driven. `draw_notifications` holds one row per draw that has been handled,
+and `lib/notifier.py` asks "which draws have no row?". Claiming a draw is an `INSERT` against a
+`PRIMARY KEY`, so the database picks a single winner. Every path calls the notifier afterwards,
+and the GitHub workflow calls `/api/notify` on every poll as a retry net.
+
+```
+IRCC feed → checker / refresh → draws table
+                                     │
+                             /api/notify (drain the outbox)
+                                     │
+                    claim a row in draw_notifications   ← the double-send guard
+                                     │
+                  build stats → render HTML → Resend batch API → subscribers
+```
+
+Two guards stop the historical archive going out as mail: `sql/schema.sql` seeds
+`draw_notifications` from every draw that already exists, and `notifier.MAX_NOTIFY_AGE`
+refuses to email about any draw dated more than 10 days ago.
+
+### Double opt-in
+
+`POST /api/subscribe` does **not** add anyone to the list. It writes a `pending` row and emails
+a confirmation link; only clicking that link sets `status = 'confirmed'`. This is what Canada's
+anti-spam legislation (CASL) means by express consent, and it also means the endpoint cannot be
+used to sign somebody else up. Unconfirmed rows are deleted after 7 days by the daily cron.
+
+The endpoint returns an identical response for a new address, an already-pending one, an
+already-confirmed one, and a rate-limited request, so it cannot be used to test whether a given
+address is on the list. A hidden honeypot field and a 3-per-IP-per-hour limit bound abuse
+without a CAPTCHA.
+
+### CASL compliance checklist
+
+| Requirement | Where it is handled |
+|---|---|
+| Express consent | Double opt-in via `/api/confirm` |
+| Proof of consent | `subscribers.consent_ip`, `consent_user_agent`, `confirmed_at` |
+| Sender identification | `MAIL_SENDER_ADDRESS` in every email footer (`lib/templates.py`) |
+| Working unsubscribe | One-click `/api/unsubscribe`, no login, effective immediately |
+| Unsubscribe in mail clients | `List-Unsubscribe` + `List-Unsubscribe-Post` headers (RFC 8058) |
+| Honoured within 10 business days | Immediate; record deleted within 30 days |
+
+> **Before going live**, set `MAIL_SENDER_ADDRESS` to a real physical or postal address (a PO
+> box is fine). CASL requires one in every commercial email, and the footer ships with a
+> placeholder until you set it.
+
+### Resend setup
+
+1. Add the domain in Resend → Domains, then create the **DKIM `TXT`**, **SPF `TXT`**, and
+   return-path records it generates in your DNS. Without these, mail is rejected or spam-filed.
+2. A DMARC record is strongly recommended alongside them:
+   `_dmarc` → `v=DMARC1; p=none; rua=mailto:you@example.com`
+3. Create an API key and set `RESEND_API_KEY` on Vercel.
+
+> **Free-tier ceiling:** Resend's free plan allows 100 emails/day. That caps the list at about
+> 100 confirmed subscribers before a paid plan (or a switch to a provider like Brevo) is
+> needed. When a send is truncated, `lib/notifier.py` logs a warning rather than failing
+> silently, and the draw is left retryable.
+
+### Testing a send safely
+
+```bash
+# Re-send the newest draw to the current list (normally only fires once)
+# 1. In Supabase: DELETE FROM draw_notifications WHERE draw_number = '<newest>';
+# 2. Then:
+curl -X POST https://ee.bittobyte.qzz.io/api/notify \
+  -H "Authorization: Bearer $REFRESH_SECRET"
+
+# Run it a second time — it must report 0 sends, proving the claim works.
 ```
 
 ---

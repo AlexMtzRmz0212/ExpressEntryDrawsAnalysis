@@ -69,3 +69,33 @@ jobs:
           done
           echo "::error::refresh failed after 3 attempts (last HTTP ${http_code:-<no response>}). See response body above."
           exit 1
+
+      - name: Drain the email notification queue
+        # Safety net, not the primary trigger. /api/refresh already sends mail when
+        # it inserts a draw; this catches the cases it cannot, namely a send that
+        # failed against the mail provider or a serverless function that timed out
+        # mid-send. /api/notify releases those stuck claims and retries them.
+        #
+        # With an empty queue this is a single database query, so running it on
+        # every poll costs nothing. always() so a failed refresh (usually an IRCC
+        # timeout) still lets a previously stuck send get retried.
+        if: always()
+        env:
+          REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+          BASE_URL: ${{ vars.BASE_URL || 'https://ee.bittobyte.qzz.io' }}
+        run: |
+          if [ -z "$REFRESH_SECRET" ]; then
+            echo "REFRESH_SECRET is not set, skipping the notification drain."
+            exit 0
+          fi
+          http_code=$(curl -sS -o /tmp/notify_resp.json -w "%{http_code}" \
+            -X POST "$BASE_URL/api/notify" \
+            -H "Authorization: Bearer $REFRESH_SECRET" \
+            -H "Content-Type: application/json") || true
+          echo "notify -> HTTP ${http_code:-<no response>}"
+          cat /tmp/notify_resp.json 2>/dev/null; echo
+          # A mail problem must never fail the workflow: the draw data is already
+          # saved, which is what this scheduler is actually responsible for.
+          if [ "$http_code" != "200" ]; then
+            echo "::warning::notify returned HTTP ${http_code:-<no response>}. Draw data is unaffected."
+          fi

@@ -72,6 +72,20 @@ input:focus { outline: none; }
   }
 }
 
+/* Signup form: input and button side by side when there is room, stacked on
+   narrow phones so neither gets squeezed below a usable width.
+   The flex sizing lives here rather than inline, because a flex-basis of 240px
+   becomes the input's HEIGHT once the axis flips to vertical, and an inline
+   style would outrank the media query that needs to reset it. */
+.subscribe-row > input  { flex: 1 1 240px; }
+.subscribe-row > button { flex: 0 0 auto; }
+
+@media (max-width: 420px) {
+  .subscribe-row { flex-direction: column; align-items: stretch; }
+  .subscribe-row > input,
+  .subscribe-row > button { flex: 0 0 auto; width: 100%; }
+}
+
 .rhythm-stat-val {
   font-size: 26px;
   font-weight: 800;
