@@ -51,6 +51,11 @@ load_dotenv()  # picks up .env in local dev; Vercel injects env vars directly
 
 logging.basicConfig(level=logging.INFO)
 
+# Report mail misconfiguration at boot rather than at the first failed send. A
+# wrong MAIL_FROM domain otherwise stays invisible until someone subscribes and
+# quietly never hears back.
+emailer.log_config_status()
+
 app = FastAPI(title="EE Draws API", version="1.0.0")
 
 app.add_middleware(
@@ -340,7 +345,20 @@ async def subscribe(payload: SubscribeRequest, request: Request) -> dict:
             return  # already confirmed; re-sending would just be noise
 
         subject, html, text = templates.confirm_email(subscriber["token"])
-        emailer.send_one(email, subject, html, text=text)
+        if not emailer.send_one(email, subject, html, text=text):
+            # The row is left pending on purpose: it expires on its own after
+            # PENDING_TTL, and re-submitting the form reissues a fresh token, so
+            # the visitor's own retry is the recovery path.
+            #
+            # The response stays SUBSCRIBE_OK regardless. Reporting the failure
+            # here would make this endpoint answer differently for an address
+            # that is already confirmed than for one that is not, which is the
+            # address-enumeration leak the single response exists to prevent.
+            # emailer has already logged the provider's reason.
+            logging.getLogger(__name__).error(
+                "Confirmation email could not be sent - the signup is stranded "
+                "as pending. See the mail error logged just above."
+            )
 
     try:
         await run_in_threadpool(_work)
@@ -474,7 +492,18 @@ async def notify(authorization: str = Header(default="")) -> dict:
         raise HTTPException(status_code=401, detail="Invalid or missing refresh secret.")
 
     await run_in_threadpool(notifier.retry_failed)
-    return await run_in_threadpool(notifier.notify_new_draws)
+    result = await run_in_threadpool(notifier.notify_new_draws)
+
+    # Config health rides along here rather than on /api/status, which is public:
+    # the sending domain and the list of what is misconfigured are both things an
+    # attacker would rather know than not.
+    return {
+        **result,
+        "mail_config": {
+            "from_domain": emailer.from_domain(),
+            "problems": emailer.check_config(),
+        },
+    }
 
 
 # Vercel Python runtime entry point

@@ -73,6 +73,104 @@ def is_configured() -> bool:
     return bool(os.environ.get("RESEND_API_KEY") and os.environ.get("MAIL_FROM"))
 
 
+def from_domain() -> str:
+    """
+    The domain part of MAIL_FROM, e.g. 'updates.bittobyte.qzz.io'.
+
+    Handles both bare addresses and the 'Name <addr@domain>' form. Returns an
+    empty string when MAIL_FROM is unset or unparseable, so callers can report
+    the problem rather than crash on it.
+    """
+    raw = os.environ.get("MAIL_FROM", "").strip()
+    if not raw:
+        return ""
+    # 'Display Name <a@b.com>' → 'a@b.com'; a bare address is left as-is.
+    if "<" in raw and ">" in raw:
+        raw = raw[raw.rfind("<") + 1 : raw.rfind(">")]
+    _, _, domain = raw.strip().partition("@")
+    return domain.strip().lower()
+
+
+def check_config() -> list[str]:
+    """
+    Report everything wrong with the mail configuration, worst first.
+
+    Deliberately does not call Resend: the API keys this app uses are restricted
+    to sending, so /domains answers 401 and cannot confirm verification. What is
+    checkable locally is checked here; the rest is caught at send time by
+    _log_send_failure(), which knows how to read Resend's rejection.
+    """
+    problems = []
+
+    if not os.environ.get("RESEND_API_KEY"):
+        problems.append("RESEND_API_KEY is not set - no mail can be sent.")
+
+    if not os.environ.get("MAIL_FROM"):
+        problems.append("MAIL_FROM is not set - no mail can be sent.")
+    elif not from_domain():
+        problems.append(
+            f"MAIL_FROM is not a usable address: {os.environ.get('MAIL_FROM')!r}. "
+            "Expected 'Name <user@domain>' or 'user@domain'."
+        )
+
+    if not sender_address():
+        problems.append(
+            "MAIL_SENDER_ADDRESS is not set - CASL requires a postal address in "
+            "the footer of commercial email."
+        )
+
+    site = site_url()
+    if "localhost" in site or "127.0.0.1" in site:
+        problems.append(
+            f"SITE_URL is {site!r} - confirm and unsubscribe links in real email "
+            "will point at a machine the recipient does not have."
+        )
+
+    return problems
+
+
+def log_config_status() -> None:
+    """Log the mail configuration once at startup. Never raises."""
+    try:
+        problems = check_config()
+    except Exception as exc:  # noqa: BLE001 - a diagnostic must never break boot
+        logger.warning("Could not check the mail configuration: %s", exc)
+        return
+
+    if problems:
+        for problem in problems:
+            logger.error("MAIL CONFIG: %s", problem)
+    else:
+        logger.info("Mail configured - sending as %s", os.environ.get("MAIL_FROM"))
+
+
+def _log_send_failure(context: str, exc: Exception) -> None:
+    """
+    Log a send failure with the provider's own explanation attached.
+
+    httpx raises HTTPStatusError with a message like "Client error '403
+    Forbidden'" and drops the response body, which is exactly where Resend puts
+    the reason. Without this the most common misconfiguration — a From domain
+    that is not verified — is invisible in the logs.
+    """
+    detail = ""
+    response = getattr(exc, "response", None)
+    if response is not None:
+        detail = (response.text or "").strip()[:500]
+
+    logger.error("%s: %s%s", context, exc, f" | {detail}" if detail else "")
+
+    # The one failure worth spelling out, because the fix is not obvious from the
+    # raw message: Resend verifies domains, and MAIL_FROM must sit on one.
+    if "not verified" in detail:
+        logger.error(
+            "MAIL CONFIG: the %r domain in MAIL_FROM is not verified in Resend. "
+            "Verify that exact domain at https://resend.com/domains, or change "
+            "MAIL_FROM to an address on a domain that already is.",
+            from_domain(),
+        )
+
+
 def send_one(
     to: str,
     subject: str,
@@ -106,7 +204,7 @@ def send_one(
         response.raise_for_status()
         return True
     except Exception as exc:  # noqa: BLE001 - mail failure must not break the caller
-        logger.error("Failed to send email to %s: %s", _redact(to), exc)
+        _log_send_failure(f"Failed to send email to {_redact(to)}", exc)
         return False
 
 
@@ -143,11 +241,8 @@ def send_batch(messages: list[dict]) -> int:
             response.raise_for_status()
             sent += len(chunk)
         except Exception as exc:  # noqa: BLE001 - keep going with the next chunk
-            logger.error(
-                "Batch %d/%d failed (%d recipients): %s",
-                index + 1,
-                len(chunks),
-                len(chunk),
+            _log_send_failure(
+                f"Batch {index + 1}/{len(chunks)} failed ({len(chunk)} recipients)",
                 exc,
             )
 
