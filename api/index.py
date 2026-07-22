@@ -346,6 +346,19 @@ async def subscribe(payload: SubscribeRequest, request: Request) -> dict:
         await run_in_threadpool(_work)
     except EnvironmentError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001 - see below
+        # Anything else here is the signup machinery being unavailable: a missing
+        # table, a bad service key, Supabase down. That is a 503, not a 500 — the
+        # request was fine, we just cannot serve it right now.
+        #
+        # The real cause goes to the log, never to `detail`: the frontend renders
+        # detail verbatim, and a raw PostgREST error would leak schema internals
+        # to the public while telling the visitor nothing useful.
+        logging.getLogger(__name__).exception("Signup failed for an address")
+        raise HTTPException(
+            status_code=503,
+            detail="Signups are temporarily unavailable. Please try again later.",
+        ) from exc
 
     return SUBSCRIBE_OK
 
